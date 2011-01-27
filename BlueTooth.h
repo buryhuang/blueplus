@@ -17,6 +17,8 @@ using namespace std;
 
 typedef vector<SdpQueryUuid> UUIDSET;
 
+typedef vector<char> BYTEBUFFER;
+
 
 #define INQUIRY_COMPLETED 0
 #define INQUIRY_TERMINATED 5
@@ -30,11 +32,11 @@ public:
 	CBlueTooth(void);
 	virtual ~CBlueTooth(void);
 
-	BOOL initializationStatus();
-	string getradioname(long address);
-	int getDeviceVersion(long address);
-	int getDeviceManufacturer(long address);
-	int runDeviceInquiry(int duration);
+	BOOL InitializationStatus();
+	string GetRadioName(long address);
+	int GetDeviceVersion(long address);
+	int GetDeviceManufacturer(long address);
+	int RunDeviceInquiry(int duration);
 
 	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, BOOL paired);
 
@@ -45,8 +47,26 @@ protected:
 	BOOL m_bInitialBtIsDiscoverable;
 	BOOL m_bRestoreBtMode;
 
-	BOOL isBluetoothStackPresent();
-	BOOL getBluetoothGetRadioInfo(long address, BLUETOOTH_RADIO_INFO* info);
+	BOOL IsBluetoothStackPresent();
+	BOOL GetBluetoothGetRadioInfo(long address, BLUETOOTH_RADIO_INFO* info);
+};
+
+class CBlueToothSocket
+{
+public:
+	BOOL   Create(BOOL authenticate, BOOL encrypt);
+	BOOL   Connect(long socket, long address, int channel, int retryUnreachable);
+	BOOL   Bind(long socket);
+	BOOL   Listen(long socket);
+	SOCKET Accept(long socket);
+	int    RecveiveAvailable(long socket);
+	void   Close(long socket);
+	int    Recveive(long socket);
+	size_t Recveive(long socket, BYTEBUFFER buff);
+	size_t Send(long socket, BYTEBUFFER buff);
+
+protected:
+	SOCKET m_socket;
 };
 
 #endif

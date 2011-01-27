@@ -21,6 +21,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="2"
+			UseOfATL="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -65,7 +66,7 @@
 				AdditionalDependencies="Bthprops.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
-				DelayLoadDLLs="intelbth.dll"
+				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				ImportLibrary=""
