@@ -23,7 +23,7 @@ class MyBT: public CBlueTooth
 {
 	void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, BOOL paired)
 	{
-		wcout<<deviceName<<endl;
+		wcout<<deviceAddr<<" - "<<deviceName<<endl;
 	}
 };
 
@@ -45,9 +45,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 		//Utils::ShowError(TEXT("_tmain"));
 
-		wprintf(L"BT status %d\n",mbt.initializationStatus());
+		wprintf(L"BT status %d\n",mbt.InitializationStatus());
 		while(true){
-		mbt.runDeviceInquiry(10);
+		mbt.RunDeviceInquiry(10);
 		}
 	}
 
