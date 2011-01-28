@@ -1,11 +1,14 @@
 #include "StdAfx.h"
 #include "InstanceMonitor.h"
+
+#include "BTDeviceDetector.h"
+#include "BTDeviceManager.h"
+
 #include <iostream>
 using namespace std;
 
 
-CInstanceMonitor::CInstanceMonitor(void):
-m_BTDeviceManager(NULL)
+CInstanceMonitor::CInstanceMonitor(void)
 {
 	if (!AfxWinInit(::GetModuleHandle(NULL), NULL, ::GetCommandLine(), 0))
 	{
@@ -17,29 +20,42 @@ m_BTDeviceManager(NULL)
 CInstanceMonitor::~CInstanceMonitor(void)
 {
 	GraceShutdown();
-
-	if(m_BTDeviceManager!=NULL){
-		delete m_BTDeviceManager;
+	vector<CManagedThread*>::iterator vi=m_listThreads.begin();
+	for(;vi!=m_listThreads.end();vi++){
+		if((*vi)!=NULL){
+			delete (*vi);
+		}
 	}
 }
 
 void CInstanceMonitor::AppStart()
 {
 
-	//Start services
-	m_BTDeviceManager=new CBTDeviceManager(L"BT Device Manager");
-	m_BTDeviceManager->Start();
+	//Register services
+	CBTDeviceDetector* pBTDeviceDetector=new CBTDeviceDetector(L"BT Device Detector");
+	this->m_listThreads.push_back(pBTDeviceDetector);
 
-	wcout<<_L(IDS_DEBUG_STARTED_SERVICE)<<m_BTDeviceManager->GetName()<<endl;
+	CBTDeviceManager* pBTDeviceManager=new CBTDeviceManager(L"BT Device Manager");
+	this->m_listThreads.push_back(pBTDeviceManager);
+
+
+	//Start services
+	vector<CManagedThread*>::iterator vi=m_listThreads.begin();
+	for(;vi!=m_listThreads.end();vi++){
+		(*vi)->Start();
+		wcout<<_L(IDS_DEBUG_STARTED_SERVICE)<<(*vi)->GetName()<<endl;
+	}
 
 
 	//Main loop: Monitor workers and keep alive.
 	while(true){
-		STDOUT<<_L(IDS_DEBUG_CHECKING_SERVICE)<<m_BTDeviceManager->GetName()<<endl;
-
-		if(!m_BTDeviceManager->IsAlive()){
-			STDOUT<<_T("Retarting ")<<m_BTDeviceManager->GetName()<<endl;
-			m_BTDeviceManager->Restart();
+		vector<CManagedThread*>::iterator vi=m_listThreads.begin();
+		for(;vi!=m_listThreads.end();vi++){
+			STDOUT<<_L(IDS_DEBUG_CHECKING_SERVICE)<<(*vi)->GetName()<<endl;
+			if(!(*vi)->IsAlive()){
+				STDOUT<<_T("Retarting ")<<(*vi)->GetName()<<endl;
+				(*vi)->Restart();
+			}
 		}
 
 		Sleep(2000);
@@ -48,7 +64,12 @@ void CInstanceMonitor::AppStart()
 
 void CInstanceMonitor::GraceShutdown()
 {
-	if(m_BTDeviceManager!=NULL){
-		m_BTDeviceManager->GraceShutdown();
+	vector<CManagedThread*>::iterator vi=m_listThreads.begin();
+	for(;vi!=m_listThreads.end();vi++){
+		if((*vi)!=NULL){
+			(*vi)->GraceShutdown();
+		}
+		wcout<<_L(IDS_DEBUG_STARTED_SERVICE)<<(*vi)->GetName()<<endl;
 	}
+
 }

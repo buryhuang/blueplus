@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ManagedObject.h"
 
 class CPrivateManagedThread;

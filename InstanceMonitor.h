@@ -1,8 +1,10 @@
 #pragma once
 
 #include "App.h"
-#include "BTDeviceManager.h"
 #include "LocalMessage.h"
+#include "ManagedThread.h"
+#include <vector>
+using namespace std;
 
 #define INST_MON_PTR (CInstanceMonitor::GetInstance());
 
@@ -23,7 +25,6 @@ public:
 	void AppStart();
 	void GraceShutdown();
 private:
+	vector<CManagedThread*> m_listThreads;
 	static CInstanceMonitor* m_instance;
-
-	CBTDeviceManager* m_BTDeviceManager;
 };

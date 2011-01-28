@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BlueTooth.h"
+#include "Utils.h"
 
 class CBlueToothSocket
 {

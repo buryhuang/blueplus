@@ -1,15 +1,13 @@
-#ifndef _BLUETOOTH_H
-#define _BLUETOOTH_H
+#ifndef _BLUETOOTH_H_
+#define _BLUETOOTH_H_
 
 #include "version.h"
 
-#include <windows.h>
+//#include <windows.h>
 
 #include <winsock2.h>
 #include <ws2bth.h>
 #include <bluetoothapis.h>
-
-#include "Utils.h"
 
 #include <string>
 #include <vector>
