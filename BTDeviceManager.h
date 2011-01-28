@@ -1,7 +1,6 @@
 #pragma once
 
-#include "stdafx.h"
-#include "ManagedObject.h"
+#include "ManagedThread.h"
 
 class CBTDeviceManager: public CManagedThread
 {

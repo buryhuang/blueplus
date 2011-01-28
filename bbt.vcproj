@@ -42,12 +42,12 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\framework"
+				AdditionalIncludeDirectories="..\;.\framework"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
@@ -124,10 +124,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=".\framework"
+				AdditionalIncludeDirectories="..\;.\framework"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
@@ -220,6 +220,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\framework\ManagedThread.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -291,6 +295,10 @@
 			</File>
 			<File
 				RelativePath=".\framework\ManagedObject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\framework\ManagedThread.h"
 				>
 			</File>
 			<File

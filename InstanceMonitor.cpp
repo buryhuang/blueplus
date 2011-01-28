@@ -26,7 +26,7 @@ CInstanceMonitor::~CInstanceMonitor(void)
 void CInstanceMonitor::AppStart()
 {
 
-	//Start service
+	//Start services
 	m_BTDeviceManager=new CBTDeviceManager(L"BT Device Manager");
 	m_BTDeviceManager->Start();
 
