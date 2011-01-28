@@ -1,5 +1,7 @@
-#include "StdAfx.h"
 #include "BlueTooth.h"
+
+#include "Utils.h"
+
 
 CBlueTooth::CBlueTooth(void):
 	m_bBluetoothStackPresent(FALSE),

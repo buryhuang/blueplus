@@ -204,6 +204,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BTDeviceDetector.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\BTDeviceManager.cpp"
 				>
 			</File>
@@ -271,6 +275,10 @@
 			</File>
 			<File
 				RelativePath=".\btapi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BTDeviceDetector.h"
 				>
 			</File>
 			<File
