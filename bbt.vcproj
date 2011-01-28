@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories=".\framework"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -69,6 +69,7 @@
 				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
+				EntryPointSymbol=""
 				ImportLibrary=""
 				TargetMachine="1"
 			/>
@@ -123,7 +124,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=""
+				AdditionalIncludeDirectories=".\framework"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
@@ -148,6 +149,7 @@
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				EntryPointSymbol="CApp::AppStart"
 				ImportLibrary=""
 				TargetMachine="1"
 			/>
@@ -186,11 +188,35 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\framework\App.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\bbt.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\BlueTooth.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BlueToothSocket.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BTDeviceManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BTHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\InstanceMonitor.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\framework\LocalMessage.cpp"
 				>
 			</File>
 			<File
@@ -224,6 +250,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\framework\App.h"
+				>
+			</File>
+			<File
 				RelativePath=".\bbt.h"
 				>
 			</File>
@@ -232,7 +262,35 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BlueToothSocket.h"
+				>
+			</File>
+			<File
 				RelativePath=".\btapi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BTDeviceManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BTHandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\InstanceMonitor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\framework\LocalMessage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\framework\ManagedObject.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\framework\ManagedObject.h"
 				>
 			</File>
 			<File
