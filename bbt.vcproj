@@ -228,6 +228,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\framework\PersistentStorage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\db\SmartDB.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\db\sqlite3.c"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -310,7 +322,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\framework\PersistentStorage.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\db\SmartDB.h"
+				>
+			</File>
+			<File
+				RelativePath=".\db\sqlite3.h"
 				>
 			</File>
 			<File
