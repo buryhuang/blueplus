@@ -295,7 +295,6 @@ SQLITE_API int sqlite3_close(sqlite3 *);
 ** compatibility and is not documented.
 */
 typedef int (*sqlite3_callback)(void*,int,char**, char**);
-typedef int (*sqlite3_callback16)(void*,int,void**, void**);//Bury
 
 /*
 ** CAPI3REF: One-Step Query Execution Interface
@@ -366,13 +365,6 @@ SQLITE_API int sqlite3_exec(
   char **errmsg                              /* Error msg written here */
 );
 
-SQLITE_API int sqlite3_exec16(
-  sqlite3*,                                  /* An open database */
-  const void *sql,                           /* SQL to be evaluated */
-  int (*sqlite3_callback16)(void*,int,void**,void**),  /* Callback function */
-  void *,                                    /* 1st argument to callback */
-  char **errmsg                              /* Error msg written here */
-);
 /*
 ** CAPI3REF: Result Codes
 ** KEYWORDS: SQLITE_OK {error code} {error codes}

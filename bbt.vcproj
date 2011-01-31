@@ -42,8 +42,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;.\framework"
-				PreprocessorDefinitions="WINVER=0x0501"
+				AdditionalIncludeDirectories="..\;.\framework;.\db"
+				PreprocessorDefinitions="WINVER=0x0501;SQLITE_OS_WIN"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -216,6 +216,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\db\CppSQLite3U.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\InstanceMonitor.cpp"
 				>
 			</File>
@@ -229,10 +233,6 @@
 			</File>
 			<File
 				RelativePath=".\framework\PersistentStorage.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\db\SmartDB.cpp"
 				>
 			</File>
 			<File
@@ -302,6 +302,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\db\CppSQLite3U.h"
+				>
+			</File>
+			<File
 				RelativePath=".\InstanceMonitor.h"
 				>
 			</File>
@@ -327,10 +331,6 @@
 			</File>
 			<File
 				RelativePath=".\Resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\db\SmartDB.h"
 				>
 			</File>
 			<File
