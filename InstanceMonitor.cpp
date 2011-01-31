@@ -4,6 +4,9 @@
 #include "BTDeviceDetector.h"
 #include "BTDeviceManager.h"
 
+#include "PersistentStorage.h"
+#include "Utils.h"
+
 #include <iostream>
 using namespace std;
 
@@ -30,7 +33,8 @@ CInstanceMonitor::~CInstanceMonitor(void)
 
 void CInstanceMonitor::AppStart()
 {
-
+	Utils::LogEvent(L"Starting App");
+#if 0
 	//Register services
 	CBTDeviceDetector* pBTDeviceDetector=new CBTDeviceDetector(L"BT Device Detector");
 	this->m_listThreads.push_back(pBTDeviceDetector);
@@ -60,6 +64,7 @@ void CInstanceMonitor::AppStart()
 
 		Sleep(2000);
 	}
+#endif
 }
 
 void CInstanceMonitor::GraceShutdown()
