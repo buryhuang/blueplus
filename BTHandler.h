@@ -3,14 +3,14 @@
 
 #include "BlueTooth.h"
 
-class BTHandler :
+class CBTHandler :
 	public CBlueTooth
 {
 public:
-	BTHandler(void);
-	virtual ~BTHandler(void);
+	CBTHandler(void);
+	virtual ~CBTHandler(void);
 
-	void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, BOOL paired);
+	void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
 };
 
 #endif

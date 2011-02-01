@@ -30,7 +30,7 @@ CBlueTooth::~CBlueTooth(void)
 	}
 }
 
-BOOL CBlueTooth::IsBluetoothStackPresent() {
+bool CBlueTooth::IsBluetoothStackPresent() {
 
 	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 	//Utils::ShowError(TEXT("isBluetoothStackPresent"));
@@ -69,7 +69,7 @@ BOOL CBlueTooth::IsBluetoothStackPresent() {
 	return m_bBluetoothStackPresent;
 }
 
-BOOL CBlueTooth::InitializationStatus() {
+bool CBlueTooth::InitializationStatus() {
     if (!m_bBluetoothStackPresent) {
         if (!IsBluetoothStackPresent()) {
             //throwBluetoothStateException(env, "BluetoothStack not detected");
@@ -86,7 +86,7 @@ BOOL CBlueTooth::InitializationStatus() {
     return FALSE;
 }
 
-BOOL CBlueTooth::GetBluetoothGetRadioInfo(long address, BLUETOOTH_RADIO_INFO* info) {
+bool CBlueTooth::GetBluetoothGetRadioInfo(long address, BLUETOOTH_RADIO_INFO* info) {
 	HANDLE hRadio;
 	BLUETOOTH_FIND_RADIO_PARAMS btfrp = { sizeof(btfrp) };
 	HBLUETOOTH_RADIO_FIND hFind = BluetoothFindFirstRadio( &btfrp, &hRadio );
@@ -227,12 +227,12 @@ int CBlueTooth::RunDeviceInquiry(int duration)
 
 		// get device name
 		WCHAR name[256];
-		BOOL bHaveName = pwsaResults->lpszServiceInstanceName && *(pwsaResults->lpszServiceInstanceName);
+		bool bHaveName = pwsaResults->lpszServiceInstanceName && *(pwsaResults->lpszServiceInstanceName);
 		StringCchPrintf(name, sizeof(name),L"%s",bHaveName ? pwsaResults->lpszServiceInstanceName : L"");
 //        debug(("ServiceInstanceName [%S]", name));
 		wstring deviceName((WCHAR *)name, (int)wcslen(name));
 
-        BOOL paired = FALSE;
+        bool paired = FALSE;
 
 		int deviceClass = p_inqRes->classOfDevice;
 		if (p_inqRes->flags & BDIF_PAIRED) {
@@ -262,7 +262,7 @@ int CBlueTooth::RunDeviceInquiry(int duration)
 
 }
 
-void CBlueTooth::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, BOOL paired)
+void CBlueTooth::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)
 {
 	//TRACE("%x - %s\n",(unsigned long)deviceAddr, deviceName.c_str());
 	//MessageBox(NULL,deviceName.c_str(),0,0);
