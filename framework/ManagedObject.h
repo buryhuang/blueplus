@@ -14,6 +14,6 @@ public:
 		return m_name;
 	}
 
-private:
+protected:
 	wstring m_name;
 };

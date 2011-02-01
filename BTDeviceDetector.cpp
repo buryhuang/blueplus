@@ -1,3 +1,4 @@
+#include "config.h"
 #include "BTDeviceDetector.h"
 #include "BTHandler.h"
 
@@ -15,13 +16,17 @@ int CBTDeviceDetector::Run()
 	int nRetCode = 0;
 
 	// 初始化 MFC 并在失败时显示错误
-	BTHandler mbt;
+	CBTHandler mbt;
 
 	//Utils::ShowError(TEXT("_tmain"));
+	while(true){
 
-	wprintf(L"BT status %d\n",mbt.InitializationStatus());
+		wprintf(L"BlueTooth initialization status: %d\n",mbt.InitializationStatus());
 
-	mbt.RunDeviceInquiry(10);
+		mbt.RunDeviceInquiry(BT_DETECT_DURATION_SECONDS);
+
+		Sleep(BT_DETECT_INTERVAL_MS);
+	}
 
 	return 0;
 }

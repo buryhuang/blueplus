@@ -61,7 +61,8 @@ void Utils::ShowError(LPTSTR lpszFunction)
 		LocalSize(lpDisplayBuf) / sizeof(TCHAR),
 		TEXT("%s failed with error %d: %s"), 
 		lpszFunction, dw, lpMsgBuf); 
-	MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
+	//MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
+	wcout<<(LPCTSTR)lpDisplayBuf<<endl;
 
 	LocalFree(lpMsgBuf);
 	LocalFree(lpDisplayBuf);

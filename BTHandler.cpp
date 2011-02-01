@@ -1,17 +1,23 @@
-#include "StdAfx.h"
 #include "BTHandler.h"
+#include "BTDeviceManager.h"
 
 #include <iostream>
 
-BTHandler::BTHandler(void)
+CBTHandler::CBTHandler(void)
 {
 }
 
-BTHandler::~BTHandler(void)
+CBTHandler::~CBTHandler(void)
 {
 }
 
-void BTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, BOOL paired)
+void CBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)
 {
-	wcout<<deviceAddr<<" - "<<deviceName<<endl;
+	wcout<<hex<<deviceAddr<<" - "<<deviceName<<endl;
+	if(DEF_BTDEV_MGR->RegisterDevice(deviceAddr, deviceClass, deviceName, paired)!=TRUE){
+		wcout<<L"Registering failed"<<endl;
+		if(DEF_BTDEV_MGR->UpdateDevice(deviceAddr, deviceClass, deviceName, paired)!=TRUE){
+			wcout<<L"Updating failed"<<endl;
+		}
+	}
 }

@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "config.h"
 #include "InstanceMonitor.h"
 
 #include "BTDeviceDetector.h"
@@ -34,14 +34,12 @@ CInstanceMonitor::~CInstanceMonitor(void)
 void CInstanceMonitor::AppStart()
 {
 	Utils::LogEvent(L"Starting App");
-#if 0
+
 	//Register services
 	CBTDeviceDetector* pBTDeviceDetector=new CBTDeviceDetector(L"BT Device Detector");
 	this->m_listThreads.push_back(pBTDeviceDetector);
 
-	CBTDeviceManager* pBTDeviceManager=new CBTDeviceManager(L"BT Device Manager");
-	this->m_listThreads.push_back(pBTDeviceManager);
-
+	this->m_listThreads.push_back(DEF_BTDEV_MGR);
 
 	//Start services
 	vector<CManagedThread*>::iterator vi=m_listThreads.begin();
@@ -62,9 +60,9 @@ void CInstanceMonitor::AppStart()
 			}
 		}
 
-		Sleep(2000);
+		Sleep(MON_THREAD_CHECK_INTERVAL_MS);
 	}
-#endif
+
 }
 
 void CInstanceMonitor::GraceShutdown()

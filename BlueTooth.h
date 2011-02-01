@@ -30,23 +30,23 @@ public:
 	CBlueTooth(void);
 	virtual ~CBlueTooth(void);
 
-	BOOL InitializationStatus();
+	bool InitializationStatus();
 	string GetRadioName(long address);
 	int GetDeviceVersion(long address);
 	int GetDeviceManufacturer(long address);
 	int RunDeviceInquiry(int duration);
 
-	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, BOOL paired);
+	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
 
 protected:
-	BOOL m_bBluetoothStackPresent;
+	bool m_bBluetoothStackPresent;
 	HANDLE m_hDeviceLookup;
-	BOOL m_bStarted;
-	BOOL m_bInitialBtIsDiscoverable;
-	BOOL m_bRestoreBtMode;
+	bool m_bStarted;
+	bool m_bInitialBtIsDiscoverable;
+	bool m_bRestoreBtMode;
 
-	BOOL IsBluetoothStackPresent();
-	BOOL GetBluetoothGetRadioInfo(long address, BLUETOOTH_RADIO_INFO* info);
+	bool IsBluetoothStackPresent();
+	bool GetBluetoothGetRadioInfo(long address, BLUETOOTH_RADIO_INFO* info);
 };
 
 #endif
