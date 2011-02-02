@@ -216,6 +216,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BTServer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\db\CppSQLite3U.cpp"
 				>
 			</File>
@@ -299,6 +303,10 @@
 			</File>
 			<File
 				RelativePath=".\BTHandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BTServer.h"
 				>
 			</File>
 			<File

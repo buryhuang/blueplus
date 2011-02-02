@@ -3,6 +3,7 @@
 
 #include "BTDeviceDetector.h"
 #include "BTDeviceManager.h"
+#include "BTServer.h"
 
 #include "PersistentStorage.h"
 #include "Utils.h"
@@ -40,6 +41,8 @@ void CInstanceMonitor::AppStart()
 	this->m_listThreads.push_back(pBTDeviceDetector);
 
 	this->m_listThreads.push_back(DEF_BTDEV_MGR);
+
+	this->m_listThreads.push_back(DEF_BTSERVER);
 
 	//Start services
 	vector<CManagedThread*>::iterator vi=m_listThreads.begin();
