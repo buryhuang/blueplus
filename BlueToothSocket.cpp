@@ -1,6 +1,28 @@
 #include "stdafx.h"
 #include "BlueToothSocket.h"
 
+CBlueToothSocket::CBlueToothSocket(void):
+	m_bStarted(FALSE),
+	m_bConnected(FALSE),
+	m_bCreated(FALSE),
+	m_pHandler(NULL)
+{
+	WSADATA data;
+	if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
+		WSAGetLastError();
+		m_bStarted = FALSE;
+	} else {
+		m_bStarted = TRUE;
+    }
+}
+
+CBlueToothSocket::~CBlueToothSocket(void)
+{
+	if (m_bStarted) {
+		WSACleanup();
+	}
+}
+
 BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 //    debug(("socket"));
 	// create socket
@@ -39,6 +61,7 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 	}
 	//debug(("socket[%u] opened", (int)s));
 	m_socket = s;
+	m_bCreated = TRUE;
 	return TRUE;
 }
 
@@ -89,7 +112,7 @@ connectRety:
 	return TRUE;
 }
 
-BOOL CBlueToothSocket::Bind(long socket) {
+BOOL CBlueToothSocket::Bind() {
 	// bind socket
 //	debug(("socket[%u] bind", (int)socket));
 
@@ -99,8 +122,8 @@ BOOL CBlueToothSocket::Bind(long socket) {
 
 	addr.port = BT_PORT_ANY;
 
-	if (bind((SOCKET)socket, (SOCKADDR *)&addr, sizeof(addr))) {
-		closesocket((SOCKET)socket);
+	if (bind((SOCKET)m_socket, (SOCKADDR *)&addr, sizeof(addr))) {
+		closesocket((SOCKET)m_socket);
 		//throwIOExceptionWSAGetLastError(env, "Failed to bind socket");
 		Utils::ShowError(TEXT("Bind"));
 		return FALSE;
@@ -108,9 +131,9 @@ BOOL CBlueToothSocket::Bind(long socket) {
 	return TRUE;
 }
 
-BOOL CBlueToothSocket::Listen(long socket) {
+BOOL CBlueToothSocket::Listen() {
     //debug(("socket[%u] listen", (int)socket));
-	if (listen((SOCKET)socket, 10)) {
+	if (listen((SOCKET)m_socket, SOMAXCONN)) {
 		//throwIOExceptionWSAGetLastError(env, "Failed to listen socket");
 		Utils::ShowError(TEXT("Listen"));
 		return FALSE;
@@ -118,13 +141,13 @@ BOOL CBlueToothSocket::Listen(long socket) {
 	return TRUE;
 }
 
-SOCKET CBlueToothSocket::Accept(long socket) {
+SOCKET CBlueToothSocket::Accept() {
 	//debug(("socket[%u] accept", (int)socket));
 	SOCKADDR_BTH addr;
 
 	int size = sizeof(SOCKADDR_BTH);
 
-	SOCKET s = accept((SOCKET)socket, (sockaddr *)&addr, &size);
+	SOCKET s = accept((SOCKET)m_socket, (sockaddr *)&addr, &size);
 
 	if (s == INVALID_SOCKET) {
 		//throwIOException(env, "Failed to listen socket");
@@ -133,11 +156,14 @@ SOCKET CBlueToothSocket::Accept(long socket) {
 	}
 
 	//debug(("connection accepted"));
-
+	m_listSocket.push_back(s);
+	if(m_pHandler!=NULL){
+		m_pHandler->OnAccept(s);
+	}
 	return s;
 }
 
-int CBlueToothSocket::RecveiveAvailable(long socket) {
+int CBlueToothSocket::RecveiveAvailable(SOCKET socket) {
 	unsigned long arg = 0;
 	if (ioctlsocket((SOCKET)socket, FIONREAD, &arg) != 0) {
 		//throwIOExceptionWSAGetLastError(env, "Failed to read available");
@@ -163,7 +189,7 @@ void CBlueToothSocket::Close(long socket) {
 	}
 }
 
-int CBlueToothSocket::Recveive(long socket) {
+int CBlueToothSocket::RecveiveChar(SOCKET socket) {
 	//debug(("socket[%u] recv()", (int)socket));
 	// Use non blocking functions to see if we have one byte
 	struct timeval timeout;
@@ -200,11 +226,12 @@ int CBlueToothSocket::Recveive(long socket) {
 	return (int)c;
 }
 
-size_t CBlueToothSocket::Recveive(long socket, BYTEBUFFER buff) {
+size_t CBlueToothSocket::Recveive() {
 	//debug(("socket[%u] recv (byte[],int,int=%i)", (int)socket, len));
 	BYTEBUFFER tmpbuff;
+	BYTEBUFFER buff;
 	int BUFFSIZE = 5000;
-	size_t len= RecveiveAvailable(socket);
+	size_t len= RecveiveAvailable(m_socket);
 
 	if(len<=0){
 		return -1;
@@ -223,7 +250,7 @@ size_t CBlueToothSocket::Recveive(long socket, BYTEBUFFER buff) {
         FD_ZERO(&readfds);
         FD_SET((SOCKET)socket, &readfds);
         FD_ZERO(&exceptfds);
-        FD_SET((SOCKET)socket, &exceptfds);
+        FD_SET((SOCKET)m_socket, &exceptfds);
         int ready_count = select(FD_SETSIZE, &readfds, NULL, &exceptfds, &timeout);
         if (ready_count == SOCKET_ERROR) {
 	        //throwIOExceptionWSAGetLastError(env, "Failed to read(byte[])/select");
@@ -238,7 +265,7 @@ size_t CBlueToothSocket::Recveive(long socket, BYTEBUFFER buff) {
 	while(done < len) {
 		tmpbuff.clear();
 		tmpbuff.resize(BUFFSIZE);
-		size_t count = recv((SOCKET)socket, &tmpbuff[0], static_cast<int>(tmpbuff.size()), 0);
+		size_t count = recv((SOCKET)m_socket, &tmpbuff[0], static_cast<int>(tmpbuff.size()), 0);
 
 		if (count == SOCKET_ERROR) {
 			//throwIOExceptionWSAGetLastError(env, "Failed to read(byte[])");
@@ -271,10 +298,13 @@ size_t CBlueToothSocket::Recveive(long socket, BYTEBUFFER buff) {
 		}
 	}
 
+	if(m_pHandler!=NULL){
+		m_pHandler->OnReceive(m_socket,buff);
+	}
 	return done;
 }
 
-size_t CBlueToothSocket::Send(long socket, BYTEBUFFER buff)
+size_t CBlueToothSocket::Send(SOCKET socket, BYTEBUFFER buff)
 {
 	//debug(("socket[%u] send(byte[],int,int=%i)", (int)socket, len));
 
