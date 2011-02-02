@@ -7,6 +7,7 @@ class CPrivateManagedThread;
 class CRunnable
 {
 public:
+	//DO NOT call directly, this is called by CPrivateManagedThread
 	virtual int Run()=0;
 };
 

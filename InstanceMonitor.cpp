@@ -34,7 +34,7 @@ CInstanceMonitor::~CInstanceMonitor(void)
 
 void CInstanceMonitor::AppStart()
 {
-	Utils::LogEvent(L"Starting App");
+	LOGSVREVENT(0,L"Starting App");
 
 	//Register services
 	CBTDeviceDetector* pBTDeviceDetector=new CBTDeviceDetector(L"BT Device Detector");

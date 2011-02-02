@@ -18,6 +18,7 @@ class CBlueToothSocket
 {
 public:
 	CBlueToothSocket();
+	CBlueToothSocket(SOCKET);
 	virtual ~CBlueToothSocket();
 	BOOL   Create(BOOL authenticate, BOOL encrypt);
 	BOOL   Connect(long socket, long address, int channel, int retryUnreachable);
@@ -28,7 +29,8 @@ public:
 	void   Close(long socket);
 	int    RecveiveChar(SOCKET socket);
 	size_t Recveive();
-	size_t Send(SOCKET socket, BYTEBUFFER buff);
+	size_t Send(BYTEBUFFER buff);
+	bool RegisterHandler(CSocketHandler*);
 
 protected:
 	SOCKET m_socket;

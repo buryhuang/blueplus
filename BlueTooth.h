@@ -15,7 +15,7 @@ using namespace std;
 
 typedef vector<SdpQueryUuid> UUIDSET;
 
-typedef vector<char> BYTEBUFFER;
+typedef string BYTEBUFFER;
 
 
 #define INQUIRY_COMPLETED 0

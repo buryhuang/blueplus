@@ -14,7 +14,11 @@ public:
 	static void ShowError(LPTSTR lpszFunction);
 
 	static wstring CurrentTime();
-	static void LogEvent(wstring msg);
+	static void LogEvent(wstring source_id, wstring source_desc, long long msg_id, wstring msg);
 };
+
+#define LOGSVREVENT(msg_id, msg) Utils::LogEvent(L"Localhost",L"Server",(msg_id),(msg))
+#define LOGBTEVENT(id,msg_id,msg) Utils::LogEvent((id),L"Bluetooth",(msg_id),(msg))
+#define LOGFDEVENT(id,msg_id,msg) Utils::LogEvent((id),L"FlashDrive",(msg_id),(msg))
 
 #endif
