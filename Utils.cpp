@@ -68,7 +68,12 @@ void Utils::ShowError(LPTSTR lpszFunction)
 	LocalFree(lpDisplayBuf);
 }
 
-void Utils::LogEvent(wstring msg)
+void Utils::LogEvent(wstring source_id, wstring source_desc, long long msg_id, wstring msg)
 {
-	PERSISTENT_STORAGE_PTR->InsertTimedValues(L"events", L"'"+msg+L"'");
+	wstringstream wss;
+	wss<<L"'"<<source_id<<L"'";
+	wss<<L",'"+source_desc+L"'";
+	wss<<","<<msg_id;
+	wss<< ",'"<<msg<<L"'";
+	PERSISTENT_STORAGE_PTR->InsertTimedValues(L"events",wss.str());
 }

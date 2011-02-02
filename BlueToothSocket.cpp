@@ -1,6 +1,15 @@
 #include "stdafx.h"
 #include "BlueToothSocket.h"
 
+CBlueToothSocket::CBlueToothSocket(SOCKET s):
+	m_bStarted(TRUE),
+	m_bConnected(TRUE),
+	m_bCreated(TRUE),
+	m_pHandler(NULL),
+	m_socket(s)
+{
+}
+
 CBlueToothSocket::CBlueToothSocket(void):
 	m_bStarted(FALSE),
 	m_bConnected(FALSE),
@@ -304,7 +313,7 @@ size_t CBlueToothSocket::Recveive() {
 	return done;
 }
 
-size_t CBlueToothSocket::Send(SOCKET socket, BYTEBUFFER buff)
+size_t CBlueToothSocket::Send(BYTEBUFFER buff)
 {
 	//debug(("socket[%u] send(byte[],int,int=%i)", (int)socket, len));
 
@@ -312,7 +321,7 @@ size_t CBlueToothSocket::Send(SOCKET socket, BYTEBUFFER buff)
 	size_t done = 0;
 	size_t len = buff.size();
 	while (done < buff.size()) {
-		size_t count = send((SOCKET)socket, &buff[0], static_cast<int>(len - done), 0);
+		size_t count = send((SOCKET)m_socket, &buff[0], static_cast<int>(len - done), 0);
 		if (count <= 0) {
 			//throwIOExceptionWSAGetLastError(env, "Failed to write");
 			Utils::ShowError(TEXT("Send"));
@@ -322,4 +331,13 @@ size_t CBlueToothSocket::Send(SOCKET socket, BYTEBUFFER buff)
 	}
 	return done;
 
+}
+
+bool CBlueToothSocket::RegisterHandler(CSocketHandler* pHandler)
+{
+	if(pHandler!=NULL){
+		m_pHandler = pHandler;
+		return TRUE;
+	}
+	return FALSE;
 }
