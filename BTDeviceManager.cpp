@@ -13,8 +13,14 @@ CBTDevice::CBTDevice(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, b
 }
 
 
-CBTDeviceManager::CBTDeviceManager(void)
+CBTDeviceManager::CBTDeviceManager(void):m_hSem(NULL)
 {
+	SECURITY_ATTRIBUTES attr;
+	attr.bInheritHandle=TRUE;
+	attr.lpSecurityDescriptor=NULL;
+	attr.nLength=sizeof(SECURITY_ATTRIBUTES);
+
+	m_hSem = CreateSemaphore(&attr,0,1000,NULL);
 }
 
 CBTDeviceManager::~CBTDeviceManager(void)
@@ -26,6 +32,10 @@ CBTDeviceManager::~CBTDeviceManager(void)
 		}
 	}
 	m_mapBTDevice.clear();
+
+	if(m_hSem!=NULL){
+		CloseHandle(m_hSem);
+	}
 }
 
 int CBTDeviceManager::Run()
@@ -51,10 +61,13 @@ bool CBTDeviceManager::RegisterDevice(CBTDevice* pDevice)
 	if(pDevice == NULL){
 		return FALSE;
 	}
+	WaitForSingleObject(m_hSem,INFINITE);
 	if(m_mapBTDevice.find(pDevice->GetAddr())==m_mapBTDevice.end()){
 		m_mapBTDevice[pDevice->GetAddr()]=pDevice;
 		return TRUE;
 	}
+	ReleaseSemaphore(m_hSem,1,NULL);
+	delete pDevice;
 	return FALSE;
 }
 
@@ -86,12 +99,16 @@ bool CBTDeviceManager::UpdateDevice(BTH_ADDR deviceAddr, int deviceClass, wstrin
 	if(m_mapBTDevice.find(deviceAddr)==m_mapBTDevice.end()){
 		return FALSE;
 	}
+
+	WaitForSingleObject(m_hSem,INFINITE);
 	CBTDevice* pDevice = m_mapBTDevice[deviceAddr];
 	
 	pDevice->SetAddr(deviceAddr);
 	pDevice->SetName(deviceName);
 	pDevice->SetDeviceClass(deviceClass);
 	pDevice->SetPaired(paired);
+
+	ReleaseSemaphore(m_hSem,1,NULL);
 	
 	return TRUE;
 }
@@ -109,11 +126,15 @@ bool CBTDeviceManager::UnregisterDevice(CBTDevice* pDevice)
 }
 bool CBTDeviceManager::UnregisterDevice(BTH_ADDR deviceAddr)
 {
+	WaitForSingleObject(m_hSem,INFINITE);
 	if(m_mapBTDevice.find(deviceAddr)==m_mapBTDevice.end()){
 		return FALSE;
 	}
 	delete m_mapBTDevice[deviceAddr];
 	m_mapBTDevice.erase(deviceAddr);
+
+	ReleaseSemaphore(m_hSem,1,NULL);
+
 	return TRUE;
 }
 

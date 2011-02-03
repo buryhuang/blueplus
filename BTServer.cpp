@@ -13,8 +13,9 @@ public:
 		wcout<<"Accepted "<<s<<endl;
 		this->Start();
 	}
-	virtual void OnReceive(SOCKET,BYTEBUFFER)
+	virtual void OnReceive(SOCKET s, BYTEBUFFER buff)
 	{
+		cout<<L"Received: "<<buff<<endl;
 	};
 	virtual void OnConnect(){};
 	virtual void OnClose(){};
