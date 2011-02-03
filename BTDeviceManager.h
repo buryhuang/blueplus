@@ -70,4 +70,6 @@ public:
 protected:
 	BT_DEV_MAP m_mapBTDevice;
 	static CBTDeviceManager* m_instance;
+
+	HANDLE m_hSem;
 };
