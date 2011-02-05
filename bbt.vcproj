@@ -227,6 +227,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Bthprops.lib"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				DelayLoadDLLs=""
