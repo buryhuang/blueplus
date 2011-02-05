@@ -33,7 +33,6 @@ public:
 		m_iDeviceClass=deviceClass;
 	}
 
-
 private:
 	BTH_ADDR m_addrBth;
 	bool m_bPaired;
@@ -59,6 +58,7 @@ public:
 	virtual bool UpdateDevice(CBTDevice* pDevice);
 
 	virtual BT_DEV_MAP GetDeviceMap();
+	void ListDevices();
 
 	static CBTDeviceManager* GetInstance(wstring name){
 		if(m_instance==NULL){
@@ -71,5 +71,5 @@ protected:
 	BT_DEV_MAP m_mapBTDevice;
 	static CBTDeviceManager* m_instance;
 
-	HANDLE m_hSem;
+	HANDLE m_hMutex;
 };
