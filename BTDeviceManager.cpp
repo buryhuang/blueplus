@@ -1,5 +1,10 @@
 #include "BTDeviceManager.h"
 #include <iostream>
+
+#ifdef UNITTEST
+#include "gtest/gtest.h"
+#endif
+
 using namespace std;
 
 CBTDeviceManager* CBTDeviceManager::m_instance=NULL;
@@ -142,3 +147,12 @@ BT_DEV_MAP CBTDeviceManager::GetDeviceMap()
 {
 	return m_mapBTDevice;
 }
+
+#ifdef UNITTEST
+
+//Unit Test
+TEST(BTDeviceManagerTest,Init)
+{
+}
+
+#endif

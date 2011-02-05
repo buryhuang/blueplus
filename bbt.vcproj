@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;.\framework;.\db"
+				AdditionalIncludeDirectories="..\;.\framework;.\db;.\test;.\test\gtest\include"
 				PreprocessorDefinitions="WINVER=0x0501;SQLITE_OS_WIN"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -124,7 +124,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\;.\framework"
+				AdditionalIncludeDirectories="..\;.\framework;.\db;.\test;.\test\gtest\include"
 				PreprocessorDefinitions="WINVER=0x0501"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -150,6 +150,89 @@
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				EntryPointSymbol="CApp::AppStart"
+				ImportLibrary=""
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Unittest|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="2"
+			UseOfATL="2"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\;.\framework;.\db;.\test;.\test\gtest-1.5.0\include"
+				PreprocessorDefinitions="WINVER=0x0501;SQLITE_OS_WIN;UNITTEST"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="4"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="Bthprops.lib"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories=""
+				DelayLoadDLLs=""
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				EntryPointSymbol=""
 				ImportLibrary=""
 				TargetMachine="1"
 			/>
@@ -256,6 +339,14 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Unittest|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -372,10 +463,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\intelbth_exps.txt"
-			>
-		</File>
 		<File
 			RelativePath=".\ReadMe.txt"
 			>
