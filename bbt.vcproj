@@ -290,7 +290,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="..\;.\framework;.\db;.\test;.\test\gtest-1.5.0\include"
-				PreprocessorDefinitions="WINVER=0x0501;UNITTEST"
+				PreprocessorDefinitions="WINVER=0x0501;UNITTEST;LOOPBACK_TEST"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

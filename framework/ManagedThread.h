@@ -23,6 +23,7 @@ public:
 	virtual int Start();
 	virtual int Restart();
 	virtual void GraceShutdown();
+	virtual void Shutdown(); //Do NOT use this until very neccessary
 
 protected:
 

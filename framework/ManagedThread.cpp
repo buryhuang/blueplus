@@ -62,3 +62,9 @@ void CManagedThread::GraceShutdown()
 {
 	WaitForSingleObject(m_ptrThread->m_hThread, INFINITE);
 }
+
+void CManagedThread::Shutdown()
+{
+	TerminateThread(m_ptrThread->m_hThread,0);
+}
+
