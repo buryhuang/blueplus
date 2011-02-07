@@ -21,13 +21,13 @@ public:
 	CBlueToothSocket(SOCKET);
 	virtual ~CBlueToothSocket();
 	BOOL   Create(BOOL authenticate, BOOL encrypt);
-	BOOL   Connect(long socket, long address, int channel, int retryUnreachable);
+	BOOL   Connect(BTH_ADDR address, int channel, int retryUnreachable);
 	BOOL   Bind();
 	BOOL   Listen();
 	SOCKET Accept();
-	int    RecveiveAvailable(SOCKET socket);
-	void   Close(long socket);
-	int    RecveiveChar(SOCKET socket);
+	int    RecveiveAvailable();
+	void   Close();
+	int    RecveiveChar();
 	size_t Recveive();
 	size_t Send(BYTEBUFFER buff);
 	bool RegisterHandler(CSocketHandler*);

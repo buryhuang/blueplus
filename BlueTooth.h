@@ -34,9 +34,12 @@ public:
 	string GetRadioName(long address);
 	int GetDeviceVersion(long address);
 	int GetDeviceManufacturer(long address);
+	
 	int RunDeviceInquiry(int duration);
 
 	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
+
+	bool GetLocalAddress(SOCKADDR_BTH&);
 
 protected:
 	bool m_bBluetoothStackPresent;

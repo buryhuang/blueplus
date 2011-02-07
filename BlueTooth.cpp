@@ -2,6 +2,8 @@
 
 #include "Utils.h"
 
+#include <iostream>
+using namespace std;
 
 CBlueTooth::CBlueTooth(void):
 	m_bBluetoothStackPresent(FALSE),
@@ -28,6 +30,44 @@ CBlueTooth::~CBlueTooth(void)
 		}
 		WSACleanup();
 	}
+}
+
+bool CBlueTooth::GetLocalAddress(SOCKADDR_BTH& btAddr)
+{
+	if(InitializationStatus()==FALSE){
+		return FALSE;
+	}
+	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+	//Utils::ShowError(TEXT("isBluetoothStackPresent"));
+	if (s == INVALID_SOCKET) {
+		int last_error = WSAGetLastError();
+		//debug(("socket error [%d] %S", last_error, getWinErrorMessage(last_error)));
+		Utils::ShowError(TEXT("isBluetoothStackPresent"));
+		return FALSE;
+	}
+
+	memset(&btAddr, 0, sizeof(SOCKADDR_BTH));
+	btAddr.addressFamily = AF_BTH;
+
+	btAddr.port = BT_PORT_ANY;
+
+	if (bind(s, (SOCKADDR *)&btAddr, sizeof(SOCKADDR_BTH))) {
+		int last_error = WSAGetLastError();
+		//debug(("bind error [%d] %S", last_error, getWinErrorMessage(last_error)));
+		Utils::ShowError(TEXT("isBluetoothStackPresent"));
+		closesocket(s);
+		return FALSE;
+	}
+
+	int size = sizeof(SOCKADDR_BTH);
+	if (getsockname(s, (sockaddr*)&btAddr, &size)) {
+		int last_error = WSAGetLastError();
+//		debug(("getsockname error [%d] %S", last_error, getWinErrorMessage(last_error)));
+		closesocket(s);
+		return FALSE;
+	}
+	closesocket(s);
+	return TRUE;
 }
 
 bool CBlueTooth::IsBluetoothStackPresent() {
@@ -63,6 +103,7 @@ bool CBlueTooth::IsBluetoothStackPresent() {
 		closesocket(s);
 		return FALSE;
 	}
+
 	closesocket(s);
 	//return TRUE;
 	m_bBluetoothStackPresent = (btAddr.btAddr != 0);
@@ -267,3 +308,19 @@ void CBlueTooth::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstrin
 	//TRACE("%x - %s\n",(unsigned long)deviceAddr, deviceName.c_str());
 	//MessageBox(NULL,deviceName.c_str(),0,0);
 }
+
+#ifdef UNITTEST
+#include "unittest_config.h"
+#include "gtest/gtest.h"
+
+CBlueTooth cbt;
+SOCKADDR_BTH localBtAddr;
+
+TEST(BlueToothTest,Init)
+{
+	ASSERT_TRUE(cbt.InitializationStatus());
+	ASSERT_TRUE(cbt.GetLocalAddress(localBtAddr));
+	wcout<<L"Local BT address is "<<hex<<localBtAddr.btAddr<<endl;
+}
+
+#endif

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "BlueToothSocket.h"
 
 CBlueToothSocket::CBlueToothSocket(SOCKET s):
@@ -36,7 +35,11 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 //    debug(("socket"));
 	// create socket
 
+#ifndef LOOPBACK_TEST
 	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
+#else
+	SOCKET s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#endif
 
 	if (s == INVALID_SOCKET) {
 		//throwIOExceptionWinGetLastError(env, "Failed to create socket");
@@ -45,7 +48,7 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 	}
 
 	// set socket options
-
+#ifndef LOOPBACK_TEST
 	if (authenticate) {
 		ULONG ul = TRUE;
 
@@ -68,6 +71,7 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 			return FALSE;
 		}
 	}
+#endif
 	//debug(("socket[%u] opened", (int)s));
 	m_socket = s;
 	m_bCreated = TRUE;
@@ -77,20 +81,32 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 
 
 
-BOOL CBlueToothSocket::Connect(long socket, long address, int channel, int retryUnreachable) {
+BOOL CBlueToothSocket::Connect(BTH_ADDR address, int channel, int retryUnreachable) {
     //debug(("socket[%u] connect", (int)socket));
 
-	SOCKADDR_BTH addr;
 
+
+#ifndef LOOPBACK_TEST
+	SOCKADDR_BTH addr;
 	memset(&addr, 0, sizeof(SOCKADDR_BTH));
 
 	addr.addressFamily = AF_BTH;
 	addr.btAddr = address;
 	addr.port = channel;
 
+#else
+	SOCKADDR_IN addr;
+	memset(&addr, 0, sizeof(sockaddr_in));
+
+    addr.sin_family = AF_INET; // address family Internet
+    addr.sin_port = htons (20248); //Port to connect on
+    addr.sin_addr.s_addr = inet_addr ("127.0.0.1");
+
+#endif
+
 	int retyCount = 0;
 connectRety:
-	if (connect((SOCKET)socket, (sockaddr *)&addr, sizeof(SOCKADDR_BTH))) {
+	if (connect((SOCKET)m_socket, (sockaddr *)&addr, sizeof(SOCKADDR_BTH))) {
 		retyCount ++;
 		int last_error = WSAGetLastError();
 		//10051 - A socket operation was attempted to an unreachable network. / Error other than time-out at L2CAP or Bluetooth radio level.
@@ -125,11 +141,20 @@ BOOL CBlueToothSocket::Bind() {
 	// bind socket
 //	debug(("socket[%u] bind", (int)socket));
 
+#ifndef LOOPBACK_TEST
 	SOCKADDR_BTH addr;
 	memset(&addr, 0, sizeof(addr));
-	addr.addressFamily = AF_BTH;
 
+	addr.addressFamily = AF_BTH;
 	addr.port = BT_PORT_ANY;
+#else
+	SOCKADDR_IN addr;
+	memset(&addr, 0, sizeof(addr));
+	
+	addr.sin_family=AF_INET; //Address family
+    addr.sin_addr.s_addr=INADDR_ANY; //Wild card IP address
+    addr.sin_port=htons((u_short)20248); //port to use
+#endif
 
 	if (bind((SOCKET)m_socket, (SOCKADDR *)&addr, sizeof(addr))) {
 		closesocket((SOCKET)m_socket);
@@ -172,19 +197,20 @@ SOCKET CBlueToothSocket::Accept() {
 	return s;
 }
 
-int CBlueToothSocket::RecveiveAvailable(SOCKET socket) {
+int CBlueToothSocket::RecveiveAvailable() {
 	unsigned long arg = 0;
-	if (ioctlsocket((SOCKET)socket, FIONREAD, &arg) != 0) {
+	if (ioctlsocket((SOCKET)m_socket, FIONREAD, &arg) != 0) {
 		//throwIOExceptionWSAGetLastError(env, "Failed to read available");
 		Utils::ShowError(TEXT("recvAvailable"));
 		return 0;
 	}
+	//cout<<"Available bytes: "<<arg<<endl;
 	return (int)arg;
 }
 
-void CBlueToothSocket::Close(long socket) {
+void CBlueToothSocket::Close() {
 	//debug(("socket[%u] close", (int)socket));
-	if (shutdown((SOCKET)socket, SD_BOTH) != 0) {
+	if (shutdown((SOCKET)m_socket, SD_BOTH) != 0) {
 	    int last_error = WSAGetLastError();
 	    if (last_error != WSAENOTCONN) {
 	        //debug(("shutdown error [%i] %S", last_error, getWinErrorMessage(last_error)));
@@ -192,13 +218,13 @@ void CBlueToothSocket::Close(long socket) {
 		Utils::ShowError(TEXT("close"));
 
 	}
-	if (closesocket((SOCKET)socket)) {
+	if (closesocket((SOCKET)m_socket)) {
 		//throwIOExceptionWSAGetLastError(env, "Failed to close socket");
 		Utils::ShowError(TEXT("close"));
 	}
 }
 
-int CBlueToothSocket::RecveiveChar(SOCKET socket) {
+int CBlueToothSocket::RecveiveChar() {
 	//debug(("socket[%u] recv()", (int)socket));
 	// Use non blocking functions to see if we have one byte
 	struct timeval timeout;
@@ -208,9 +234,9 @@ int CBlueToothSocket::RecveiveChar(SOCKET socket) {
         fd_set readfds;
         fd_set exceptfds;
         FD_ZERO(&readfds);
-        FD_SET((SOCKET)socket, &readfds);
+        FD_SET((SOCKET)m_socket, &readfds);
         FD_ZERO(&exceptfds);
-        FD_SET((SOCKET)socket, &exceptfds);
+        FD_SET((SOCKET)m_socket, &exceptfds);
         int ready_count = select(FD_SETSIZE, &readfds, NULL, &exceptfds, &timeout);
         if (ready_count == SOCKET_ERROR) {
 	        //throwIOExceptionWSAGetLastError(env, "Failed to read(int)/select");
@@ -222,7 +248,7 @@ int CBlueToothSocket::RecveiveChar(SOCKET socket) {
     }
     // Read the data when available
 	unsigned char c;
-	int rc = recv((SOCKET)socket, (char *)&c, 1, 0);
+	int rc = recv((SOCKET)m_socket, (char *)&c, 1, 0);
 	if (rc == SOCKET_ERROR) {
 		//throwIOExceptionWSAGetLastError(env, "Failed to read(int)");
 		Utils::ShowError(TEXT("Receive"));
@@ -240,14 +266,6 @@ size_t CBlueToothSocket::Recveive() {
 	BYTEBUFFER tmpbuff;
 	BYTEBUFFER buff;
 	int BUFFSIZE = 5000;
-	size_t len= RecveiveAvailable(m_socket);
-
-	if(len<=0){
-		return -1;
-	}
-
-	buff.clear();
-	buff.reserve(len);
 
 	// Use non blocking functions to see if we have one byte
     struct timeval timeout;
@@ -257,7 +275,7 @@ size_t CBlueToothSocket::Recveive() {
         fd_set readfds;
         fd_set exceptfds;
         FD_ZERO(&readfds);
-        FD_SET((SOCKET)socket, &readfds);
+        FD_SET((SOCKET)m_socket, &readfds);
         FD_ZERO(&exceptfds);
         FD_SET((SOCKET)m_socket, &exceptfds);
         int ready_count = select(FD_SETSIZE, &readfds, NULL, &exceptfds, &timeout);
@@ -269,12 +287,22 @@ size_t CBlueToothSocket::Recveive() {
             break;
         }
     }
+
     // Read the data when available
-    size_t done = 0;
+	size_t len = RecveiveAvailable();
+
+	if(len<=0){
+		return -1;
+	}
+	buff.clear();
+	buff.reserve(len);
+	
+	size_t done = 0;
 	while(done < len) {
 		tmpbuff.clear();
-		tmpbuff.resize(BUFFSIZE);
+		tmpbuff.resize(len-done);
 		size_t count = recv((SOCKET)m_socket, &tmpbuff[0], static_cast<int>(tmpbuff.size()), 0);
+		//cout<<"received bytes: "<<count<<"content: "<<tmpbuff<<endl;
 
 		if (count == SOCKET_ERROR) {
 			//throwIOExceptionWSAGetLastError(env, "Failed to read(byte[])");
@@ -291,23 +319,27 @@ size_t CBlueToothSocket::Recveive() {
 				break;
 			}
 		}
-		ASSERT(count>=0);
+		//ASSERT(count>=0);
+		if(count<0){
+			Utils::ShowError(TEXT("Receive"));
+			done = -1;
+			break;
+		}
 		tmpbuff.resize(count);
 		buff.insert(buff.end(),tmpbuff.begin(),tmpbuff.end());		
 
 		done += count;
+		//cout<<"Done: "<<done<<", len: "<<len<<endl;
 		if (done != 0) {
-            unsigned long available = 0;
-	        if (ioctlsocket((SOCKET)socket, FIONREAD, &available) != 0) {
-	            // error;
-	            break;
-	        } else if (available == 0) {
+	        if (RecveiveAvailable()==0) {
 	            break;
 	        }
 		}
 	}
 
+	//cout<<"Should not be NULL: "<<hex<<(unsigned long)m_pHandler<<endl;
 	if(m_pHandler!=NULL){
+		//cout<<"About to pass data: "<<buff<<endl;
 		m_pHandler->OnReceive(m_socket,buff);
 	}
 	return done;
