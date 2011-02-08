@@ -7,10 +7,11 @@ using namespace std;
 CBTDeviceManager* CBTDeviceManager::m_instance=NULL;
 
 CBTDevice::CBTDevice(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired):
-	CManagedObject(deviceName),
+	m_deviceName(deviceName),
 	m_addrBth(deviceAddr),
 	m_iDeviceClass(deviceClass),
-	m_bPaired(paired)
+	m_bPaired(paired),
+	m_pSocket(NULL)
 {
 }
 
@@ -48,7 +49,7 @@ void CBTDeviceManager::ListDevices()
 	int cnt=1;
 	for(;mit!=m_mapBTDevice.end();mit++){
 		if(mit->second != NULL){
-			wcout<<cnt<<". "<<hex<<mit->second->GetAddr()<<L" - "<<mit->second->GetName()<<endl;
+			wcout<<cnt<<". "<<hex<<mit->second->m_addrBth<<L" - "<<mit->second->m_deviceName<<endl;
 			cnt++;
 		}
 	}
@@ -71,8 +72,8 @@ bool CBTDeviceManager::RegisterDevice(CBTDevice* pDevice)
 		return FALSE;
 	}
 	WaitForSingleObject(m_hMutex,INFINITE);
-	if(m_mapBTDevice.find(pDevice->GetAddr())==m_mapBTDevice.end()){
-		m_mapBTDevice[pDevice->GetAddr()]=pDevice;
+	if(m_mapBTDevice.find(pDevice->m_addrBth)==m_mapBTDevice.end()){
+		m_mapBTDevice[pDevice->m_addrBth]=pDevice;
 		return TRUE;
 	}
 	ReleaseMutex(m_hMutex);
@@ -91,15 +92,15 @@ bool CBTDeviceManager::RegisterDevice(BTH_ADDR deviceAddr, int deviceClass, wstr
 
 bool CBTDeviceManager::UpdateDevice(CBTDevice* pDevice)
 {
-	if(m_mapBTDevice.find(pDevice->GetAddr())==m_mapBTDevice.end()){
+	if(m_mapBTDevice.find(pDevice->m_addrBth)==m_mapBTDevice.end()){
 		return FALSE;
 	}
 	
 	return UpdateDevice(
-			pDevice->GetAddr()
-			,pDevice->GetDeviceClass()
-			,pDevice->GetName()
-			,pDevice->IsPaired()
+			pDevice->m_addrBth
+			,pDevice->m_iDeviceClass
+			,pDevice->m_deviceName
+			,pDevice->m_bPaired
 		);
 }
 
@@ -112,10 +113,10 @@ bool CBTDeviceManager::UpdateDevice(BTH_ADDR deviceAddr, int deviceClass, wstrin
 	WaitForSingleObject(m_hMutex,INFINITE);
 	CBTDevice* pDevice = m_mapBTDevice[deviceAddr];
 	
-	pDevice->SetAddr(deviceAddr);
-	pDevice->SetName(deviceName);
-	pDevice->SetDeviceClass(deviceClass);
-	pDevice->SetPaired(paired);
+	pDevice->m_addrBth=deviceAddr;
+	pDevice->m_deviceName=deviceName;
+	pDevice->m_iDeviceClass=deviceClass;
+	pDevice->m_bPaired=paired;
 
 	ReleaseMutex(m_hMutex);
 	
@@ -127,11 +128,11 @@ bool CBTDeviceManager::UnregisterDevice(CBTDevice* pDevice)
 	if(pDevice == NULL){
 		return FALSE;
 	}
-	BTH_ADDR deviceAddr = pDevice->GetAddr();
+	BTH_ADDR deviceAddr = pDevice->m_addrBth;
 	if(m_mapBTDevice.find(deviceAddr)==m_mapBTDevice.end()){
 		return FALSE;
 	}
-	return UnregisterDevice(pDevice->GetAddr());
+	return UnregisterDevice(pDevice->m_addrBth);
 }
 bool CBTDeviceManager::UnregisterDevice(BTH_ADDR deviceAddr)
 {

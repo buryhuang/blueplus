@@ -2,40 +2,20 @@
 
 #include "ManagedThread.h"
 #include "BlueTooth.h"
+#include "BlueToothSocket.h"
 #include <map>
 using namespace std;
 
 #define DEF_BTDEV_MGR CBTDeviceManager::GetInstance(L"BT Device Manager")
 
-class CBTDevice: public CManagedObject
+class CBTDevice
 {
 public:
 	CBTDevice(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
-	BTH_ADDR GetAddr(){
-		return m_addrBth;
-	}
-	bool IsPaired(){
-		return m_bPaired;
-	}
-	int GetDeviceClass(){
-		return m_iDeviceClass;
-	}
-	void SetName(wstring name){
-		m_name = name;
-	}
-	void SetAddr(BTH_ADDR deviceAddr){
-		m_addrBth=deviceAddr;
-	}
-	void SetPaired(bool paired){
-		m_bPaired=paired;
-	}
-	void SetDeviceClass(int deviceClass){
-		m_iDeviceClass=deviceClass;
-	}
-
-private:
+	CBlueToothSocket* m_pSocket;
 	BTH_ADDR m_addrBth;
 	bool m_bPaired;
+	wstring m_deviceName;
 	int m_iDeviceClass;
 };
 
