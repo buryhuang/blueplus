@@ -4,9 +4,21 @@
 #include "CppSQLite3U.h"
 
 #include <string>
+#include <map>
 using namespace std;
 
 #define PERSISTENT_STORAGE_PTR (CPersistentStorage::GetInstance(L"Default"))
+
+struct CEvent
+{
+public:
+	wstring timestamp;
+	wstring source_id;
+	wstring source_desc;
+	long long event_id;
+	wstring event_desc;
+	bool isNull;
+};
 
 class CPersistentStorageImpl;
 
@@ -20,6 +32,9 @@ public:
 	virtual ~CPersistentStorage(void){}
 
 	virtual void InsertTimedValues(wstring table, wstring values)=0;
+	virtual bool NextRecord()=0;
+	virtual CEvent GetRecord()=0;
+	virtual CEvent GetLastRecord()=0;
 private:
 	static CPersistentStorage* m_instance;
 };
@@ -34,6 +49,9 @@ public:
 
 	virtual ~CPersistentStorageImpl(void);
 	virtual void InsertTimedValues(wstring table, wstring values);
+	virtual bool NextRecord();
+	virtual CEvent GetRecord();
+	virtual CEvent GetLastRecord();
 
 protected:
 	CppSQLite3DB m_db;

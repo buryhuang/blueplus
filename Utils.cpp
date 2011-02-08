@@ -77,3 +77,29 @@ void Utils::LogEvent(wstring source_id, wstring source_desc, long long msg_id, w
 	wss<< ",'"<<msg<<L"'";
 	PERSISTENT_STORAGE_PTR->InsertTimedValues(L"events",wss.str());
 }
+
+#ifdef UNITTEST
+#include "unittest_config.h"
+#include "gtest/gtest.h"
+
+TEST(UtilsTest,Logging)
+{
+	Utils::LogEvent(L"UTEST_SRCID",L"UTEST_SRCDESC",999999,L"UTEST_EVTDESC");
+
+	CEvent evt = PERSISTENT_STORAGE_PTR->GetLastRecord();
+	if(evt.isNull==FALSE){
+		wcout<<evt.timestamp<<"\t";
+		wcout<<evt.source_id<<"\t";
+		wcout<<evt.source_desc<<"\t";
+		wcout<<evt.event_id<<"\t";
+		wcout<<evt.event_desc<<"\t";
+		wcout<<endl;
+		ASSERT_TRUE(evt.source_id==L"UTEST_SRCID");
+		ASSERT_TRUE(evt.source_desc==L"UTEST_SRCDESC");
+		ASSERT_TRUE(evt.event_id==999999);
+		ASSERT_TRUE(evt.event_desc==L"UTEST_EVTDESC");
+	}
+}
+
+
+#endif
