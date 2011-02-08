@@ -4,7 +4,7 @@
 using namespace std;
 
 #ifdef UNITTEST
-BYTEBUFFER m_lastBuff;
+static BYTEBUFFER m_lastBuff;
 #endif
 
 class CBTServerHandler:public CSocketHandler, public CManagedThread
