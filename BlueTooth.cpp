@@ -309,6 +309,199 @@ void CBlueTooth::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstrin
 	//MessageBox(NULL,deviceName.c_str(),0,0);
 }
 
+vector<int> CBlueTooth::RunSearchServices(vector<SdpQueryUuid> uuidSet, BTH_ADDR address) 
+{
+	//debug(("runSearchServices"));
+    vector<int> result;
+
+
+	// 	check if we can handle the number of UUIDs supplied
+	if (uuidSet.size() > MAX_UUIDS_IN_QUERY) {
+		return result;
+	}
+
+	// 	generate a Bluetooth address string (WSAAddressToString doesn't work on WinCE)
+
+	WCHAR addressString[20];
+
+	swprintf_s(addressString, L"(%02x:%02x:%02x:%02x:%02x:%02x)", (int)(address>>40&0xff), (int)(address>>32&0xff), (int)(address>>24&0xff), (int)(address>>16&0xff), (int)(address>>8&0xff), (int)(address&0xff));
+
+	//	build service query
+
+	BTH_QUERY_SERVICE queryservice;
+
+	memset(&queryservice, 0, sizeof(queryservice));
+
+	queryservice.type = SDP_SERVICE_SEARCH_REQUEST;
+
+	for(int i = 0; uuidSet.size(); i++) {
+
+		//UUID is full 128 bits
+
+		queryservice.uuids[i].uuidType = SDP_ST_UUID128;
+
+		queryservice.uuids[i].u.uuid128 = uuidSet[i].u.uuid128;
+
+	}
+
+	// build BLOB pointing to service query
+
+	BLOB blob;
+
+	blob.cbSize = sizeof(queryservice);
+	blob.pBlobData = (BYTE *)&queryservice;
+
+	// build query
+
+	WSAQUERYSET queryset;
+
+	memset(&queryset, 0, sizeof(WSAQUERYSET));
+
+	queryset.dwSize = sizeof(WSAQUERYSET);
+	queryset.dwNameSpace = NS_BTH;
+	queryset.lpBlob = &blob;
+
+	queryset.lpszContext = addressString;
+
+	HANDLE hLookupSearchServices;
+
+	// begin query
+
+	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookupSearchServices)) {
+		Utils::ShowError(L"RunSearchServices");
+		return result;
+	}
+
+	// fetch results
+
+	int bufSize = 0x2000;
+	void* buf = malloc(bufSize);
+	if (buf == NULL) {
+		WSALookupServiceEnd(hLookupSearchServices);
+		return result;
+	}
+	memset(buf, 0, bufSize);
+
+	LPWSAQUERYSET pwsaResults = (LPWSAQUERYSET) buf;
+	pwsaResults->dwSize = sizeof(WSAQUERYSET);
+	pwsaResults->dwNameSpace = NS_BTH;
+	pwsaResults->lpBlob = NULL;
+
+	DWORD size = bufSize;
+
+
+	if (WSALookupServiceNext(hLookupSearchServices, LUP_RETURN_BLOB, &size, pwsaResults)) {
+		int last_error = WSAGetLastError();
+		switch(last_error) {
+			case WSANO_DATA:
+				result.clear();
+				break;
+			default:
+				//debug(("WSALookupServiceNext error [%i] %S", last_error, getWinErrorMessage(last_error)));
+				result.clear();
+		}
+	} else {
+		// construct int array to hold handles
+		result.resize(pwsaResults->lpBlob->cbSize/sizeof(ULONG));
+		memcpy(&result[0], pwsaResults->lpBlob->pBlobData, pwsaResults->lpBlob->cbSize);
+	}
+	WSALookupServiceEnd(hLookupSearchServices);
+	free(buf);
+	return result;
+}
+
+vector<char> CBlueTooth::GetServiceAttributes(vector<int> attrIDs, BTH_ADDR address, int handle)
+{
+    //debug(("getServiceAttributes"));
+	vector<char> result;
+
+	// generate a Bluetooth address string (WSAAddressToString doesn't work on WinCE)
+
+	WCHAR addressString[20];
+
+	swprintf_s(addressString, L"(%02x:%02x:%02x:%02x:%02x:%02x)", (int)(address>>40&0xff), (int)(address>>32&0xff), (int)(address>>24&0xff), (int)(address>>16&0xff), (int)(address>>8&0xff), (int)(address&0xff));
+
+	// build attribute query
+
+	BTH_QUERY_SERVICE *queryservice = (BTH_QUERY_SERVICE *)malloc(sizeof(BTH_QUERY_SERVICE)+sizeof(SdpAttributeRange)*(attrIDs.size()-1));
+	memset(queryservice, 0, sizeof(BTH_QUERY_SERVICE)-sizeof(SdpAttributeRange));
+
+	queryservice->type = SDP_SERVICE_ATTRIBUTE_REQUEST;
+	queryservice->serviceHandle = handle;
+	queryservice->numRange = (ULONG)attrIDs.size();
+
+	// set attribute ranges
+
+	for(unsigned int i = 0; i < attrIDs.size(); i++) {
+		queryservice->pRange[i].minAttribute = (USHORT)attrIDs[i];
+		queryservice->pRange[i].maxAttribute = (USHORT)attrIDs[i];
+	}
+
+	// build BLOB pointing to attribute query
+
+	BLOB blob;
+
+	blob.cbSize = sizeof(BTH_QUERY_SERVICE);
+
+	blob.pBlobData = (BYTE *)queryservice;
+
+	// build query
+
+	WSAQUERYSET queryset;
+
+	memset(&queryset, 0, sizeof(WSAQUERYSET));
+
+	queryset.dwSize = sizeof(WSAQUERYSET);
+	queryset.dwNameSpace = NS_BTH;
+
+	queryset.lpszContext = addressString;
+	queryset.lpBlob = &blob;
+
+	HANDLE hLookupServiceAttributes;
+
+	// begin query
+
+	if (WSALookupServiceBegin(&queryset, LUP_FLUSHCACHE, &hLookupServiceAttributes)) {
+		free(queryservice);
+		//throwIOExceptionWSAGetLastError(env, "Failed to begin attribute query");
+		Utils::ShowError(L"GetServiceAttributes");
+		return result;
+	}
+
+	free(queryservice);
+
+	// fetch results
+	int bufSize = 0x2000;
+	void* buf = malloc(bufSize);
+	if (buf == NULL) {
+		WSALookupServiceEnd(hLookupServiceAttributes);
+		return result;
+	}
+	memset(buf, 0, bufSize);
+
+	LPWSAQUERYSET pwsaResults = (LPWSAQUERYSET) buf;
+	pwsaResults->dwSize = sizeof(WSAQUERYSET);
+	pwsaResults->dwNameSpace = NS_BTH;
+	pwsaResults->lpBlob = NULL;
+
+	DWORD size = bufSize;
+
+	if (WSALookupServiceNext(hLookupServiceAttributes, LUP_RETURN_BLOB, &size, pwsaResults)) {
+		//throwIOExceptionWSAGetLastError(env, "Failed to perform attribute query");
+		Utils::ShowError(L"GetServiceAttributes");
+		result.clear();
+	} else {
+		// construct byte array to hold blob
+		result.resize(pwsaResults->lpBlob->cbSize);
+		memcpy(&result[0], pwsaResults->lpBlob->pBlobData, pwsaResults->lpBlob->cbSize);
+	}
+	WSALookupServiceEnd(hLookupServiceAttributes);
+	free(buf);
+	return result;
+}
+
+
+
 #ifdef UNITTEST
 #include "unittest_config.h"
 #include "gtest/gtest.h"
