@@ -36,6 +36,8 @@ public:
 	int GetDeviceManufacturer(long address);
 	
 	int RunDeviceInquiry(int duration);
+	vector<int> RunSearchServices(vector<SdpQueryUuid> uuidSet, BTH_ADDR address);
+	vector<char> GetServiceAttributes(vector<int> attrIDs, BTH_ADDR address, int handle);
 
 	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
 
