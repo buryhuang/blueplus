@@ -8,11 +8,28 @@ using namespace std;
 
 #define DEF_BTDEV_MGR CBTDeviceManager::GetInstance(L"BT Device Manager")
 
+class CDevMgrBTHandlerThread:public CSocketHandler, public CManagedThread
+{
+public:
+
+	CDevMgrBTHandlerThread::CDevMgrBTHandlerThread(wstring name,BTH_ADDR addr)
+		:CManagedThread(name),m_addrBth(addr){}
+	virtual void OnAccept(SOCKET s){}
+	virtual void OnReceive(SOCKET s, BYTEBUFFER buff);
+	virtual void OnConnect(){};
+	virtual void OnClose(){};
+	virtual int Run();
+	wstring GetStatusString(){return m_pSocket->GetStatusString();}
+private:
+	BTH_ADDR m_addrBth;
+	CBlueToothSocket * m_pSocket;
+};
+
 class CBTDevice
 {
 public:
 	CBTDevice(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
-	CBlueToothSocket* m_pSocket;
+	CDevMgrBTHandlerThread* m_pSockHandler;
 	BTH_ADDR m_addrBth;
 	bool m_bPaired;
 	wstring m_deviceName;

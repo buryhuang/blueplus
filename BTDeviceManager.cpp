@@ -6,12 +6,29 @@ using namespace std;
 
 CBTDeviceManager* CBTDeviceManager::m_instance=NULL;
 
+void CDevMgrBTHandlerThread::OnReceive(SOCKET s, BYTEBUFFER buff)
+{
+	cout<<"Received: "<<buff<<endl;
+};
+int CDevMgrBTHandlerThread::Run()
+{
+	m_pSocket = new CBlueToothSocket();
+	m_pSocket->RegisterHandler(this);
+	m_pSocket->Create(FALSE,FALSE);
+	m_pSocket->Connect(m_addrBth,1,10);
+
+	//Thread main loop
+	while(m_pSocket->Recveive());
+
+	return 0;
+}
+
 CBTDevice::CBTDevice(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired):
 	m_deviceName(deviceName),
 	m_addrBth(deviceAddr),
 	m_iDeviceClass(deviceClass),
 	m_bPaired(paired),
-	m_pSocket(NULL)
+	m_pSockHandler(NULL)
 {
 }
 
@@ -49,7 +66,8 @@ void CBTDeviceManager::ListDevices()
 	int cnt=1;
 	for(;mit!=m_mapBTDevice.end();mit++){
 		if(mit->second != NULL){
-			wcout<<cnt<<". "<<hex<<mit->second->m_addrBth<<L" - "<<mit->second->m_deviceName<<endl;
+			CBTDevice* pDev = mit->second;
+			wcout<<cnt<<". "<<hex<<pDev->m_addrBth<<L" - "<<pDev->m_iDeviceClass<<L" - "<<pDev->m_deviceName<<endl;
 			cnt++;
 		}
 	}
@@ -60,8 +78,35 @@ void CBTDeviceManager::ListDevices()
 int CBTDeviceManager::Run()
 {
 	while(true){
-		ListDevices();
-		Sleep(5000);
+		WaitForSingleObject(m_hMutex,INFINITE);
+		wcout<<L"***Device list:***"<<endl;
+		wcout<<L"Size of list is: "<<dec<<m_mapBTDevice.size()<<endl;
+		BT_DEV_MAP::iterator mit = m_mapBTDevice.begin();
+		int cnt=1;
+		for(;mit!=m_mapBTDevice.end();mit++){
+			if(mit->second != NULL){
+				CBTDevice* pDev = mit->second;
+				wcout<<cnt<<". "<<hex<<pDev->m_addrBth<<L" - "<<pDev->m_iDeviceClass<<L" - "<<pDev->m_deviceName;
+				cnt++;
+
+				if(pDev->m_pSockHandler == NULL){
+					pDev->m_pSockHandler = new CDevMgrBTHandlerThread(L"DevManager BT Handler", pDev->m_addrBth);
+					pDev->m_pSockHandler->Start();
+				}
+
+				else if(pDev->m_pSockHandler->IsAlive()){
+					wcout<<L" - "<<pDev->m_pSockHandler->GetStatusString() <<endl;
+				}else{
+					wcout<<L" - Not active"<<endl;
+				}
+
+				wcout<<endl;
+			}
+		}
+		wcout<<L"***End of list***"<<endl<<endl;
+		ReleaseMutex(m_hMutex);
+
+		Sleep(BT_DEV_MGR_ROUTINE_INTERVAL_MS);
 	}
 	return 0;
 }

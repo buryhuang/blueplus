@@ -4,16 +4,24 @@ CBlueToothSocket::CBlueToothSocket(SOCKET s):
 	m_bStarted(TRUE),
 	m_bConnected(TRUE),
 	m_bCreated(TRUE),
-	m_pHandler(NULL),
-	m_socket(s)
+	m_pHandler(NULL)
 {
+	if(s!=INVALID_SOCKET){
+		m_socket=s;
+		m_iStatus=CONNECTED;
+	}else{
+		m_socket=INVALID_SOCKET;
+		m_iStatus=NOT_CREATED;
+	}
 }
 
 CBlueToothSocket::CBlueToothSocket(void):
 	m_bStarted(FALSE),
 	m_bConnected(FALSE),
 	m_bCreated(FALSE),
-	m_pHandler(NULL)
+	m_pHandler(NULL),
+	m_iStatus(NOT_CREATED),
+	m_socket(INVALID_SOCKET)
 {
 	WSADATA data;
 	if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
@@ -75,6 +83,7 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 	//debug(("socket[%u] opened", (int)s));
 	m_socket = s;
 	m_bCreated = TRUE;
+	m_iStatus = CREATED;
 	return TRUE;
 }
 
@@ -84,6 +93,7 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 BOOL CBlueToothSocket::Connect(BTH_ADDR address, int channel, int retryUnreachable) {
     //debug(("socket[%u] connect", (int)socket));
 
+	m_iStatus = CONNECTING;
 
 
 #ifndef LOOPBACK_TEST
@@ -122,17 +132,22 @@ connectRety:
 		if (last_error == WSAEACCES) {
 			//throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "Connecting application requested authentication, but authentication failed [10013] .");
 			Utils::ShowError(TEXT("Connect"));
+			m_iStatus = CONNECTION_AUTH_FAILED;
 			return FALSE;
 		} else if (last_error == WSAETIMEDOUT) {
 			//throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout; [%lu] %S", last_error, getWinErrorMessage(last_error));
 			Utils::ShowError(TEXT("Connect"));
+			m_iStatus = CONNECTION_TIMEOUT;
 			return FALSE;
 		} else {
 			//throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to connect; [%lu] %S", last_error, getWinErrorMessage(last_error));
 			Utils::ShowError(TEXT("Connect"));
+			m_iStatus = CONNECTION_FAILED;
 			return FALSE;
 		}
 	}
+
+	m_iStatus = CONNECTED;
 
 	return TRUE;
 }
@@ -167,6 +182,8 @@ BOOL CBlueToothSocket::Bind() {
 
 BOOL CBlueToothSocket::Listen() {
     //debug(("socket[%u] listen", (int)socket));
+	m_iStatus = LISTENING;
+
 	if (listen((SOCKET)m_socket, SOMAXCONN)) {
 		//throwIOExceptionWSAGetLastError(env, "Failed to listen socket");
 		Utils::ShowError(TEXT("Listen"));
@@ -186,8 +203,10 @@ SOCKET CBlueToothSocket::Accept() {
 	if (s == INVALID_SOCKET) {
 		//throwIOException(env, "Failed to listen socket");
 		Utils::ShowError(TEXT("Accept"));
-		return 0;
+		return INVALID_SOCKET;
 	}
+
+	m_iStatus = ACCEPTED;
 
 	//debug(("connection accepted"));
 	m_listSocket.push_back(s);
@@ -222,9 +241,14 @@ void CBlueToothSocket::Close() {
 		//throwIOExceptionWSAGetLastError(env, "Failed to close socket");
 		Utils::ShowError(TEXT("close"));
 	}
+	m_iStatus = CLOSED;
 }
 
 int CBlueToothSocket::RecveiveChar() {
+	if(m_iStatus != CONNECTED){
+		return -1;
+	}
+
 	//debug(("socket[%u] recv()", (int)socket));
 	// Use non blocking functions to see if we have one byte
 	struct timeval timeout;
@@ -263,6 +287,10 @@ int CBlueToothSocket::RecveiveChar() {
 
 size_t CBlueToothSocket::Recveive() {
 	//debug(("socket[%u] recv (byte[],int,int=%i)", (int)socket, len));
+	if(m_iStatus != CONNECTED){
+		return -1;
+	}
+
 	BYTEBUFFER tmpbuff;
 	BYTEBUFFER buff;
 	int BUFFSIZE = 5000;
@@ -282,6 +310,8 @@ size_t CBlueToothSocket::Recveive() {
         if (ready_count == SOCKET_ERROR) {
 	        //throwIOExceptionWSAGetLastError(env, "Failed to read(byte[])/select");
 			Utils::ShowError(TEXT("Receive"));
+			m_iStatus = RECV_FAILED;
+
 	        return -1;
 	    } else if (ready_count > 0) {
             break;
@@ -292,6 +322,7 @@ size_t CBlueToothSocket::Recveive() {
 	size_t len = RecveiveAvailable();
 
 	if(len<=0){
+		m_iStatus = RECV_FAILED;
 		return -1;
 	}
 	buff.clear();
@@ -307,11 +338,13 @@ size_t CBlueToothSocket::Recveive() {
 		if (count == SOCKET_ERROR) {
 			//throwIOExceptionWSAGetLastError(env, "Failed to read(byte[])");
 			Utils::ShowError(TEXT("Receive"));
+			m_iStatus = RECV_FAILED;
 			done = -1;
 			break;
 		} else if (count == 0) {
 			//debug(("Connection closed"));
 			if (done == 0) {
+				m_iStatus = RECV_FAILED;
 				// See InputStream.read();
 				done = -1;
 			    break;
@@ -322,6 +355,7 @@ size_t CBlueToothSocket::Recveive() {
 		//ASSERT(count>=0);
 		if(count<0){
 			Utils::ShowError(TEXT("Receive"));
+			m_iStatus = RECV_FAILED;
 			done = -1;
 			break;
 		}
@@ -365,6 +399,7 @@ size_t CBlueToothSocket::Send(BYTEBUFFER buff)
 
 }
 
+
 bool CBlueToothSocket::RegisterHandler(CSocketHandler* pHandler)
 {
 	if(pHandler!=NULL){
@@ -372,4 +407,46 @@ bool CBlueToothSocket::RegisterHandler(CSocketHandler* pHandler)
 		return TRUE;
 	}
 	return FALSE;
+}
+
+wstring CBlueToothSocket::GetStatusString()
+{
+	switch(m_iStatus){
+		case NOT_CREATED:
+			return L"Not Created";
+			break;
+		case CREATED:
+			return L"Created";
+			break;
+		case LISTENING:
+			return L"Listening";
+			break;
+		case ACCEPTED:
+			return L"Accepted";
+			break;
+		case CONNECTING:
+			return L"Connecting";
+			break;
+		case CONNECTION_AUTH_FAILED:
+			return L"Connection authorization failed";
+			break;
+		case CONNECTION_TIMEOUT:
+			return L"Connection timeout";
+			break;
+		case CONNECTION_FAILED:
+			return L"Connection failed";
+			break;
+		case CONNECTED:
+			return L"Connected";
+			break;
+		case RECV_FAILED:
+			return L"Receive failed";
+			break;
+		case CLOSED:
+			return L"Closed";
+			break;
+		default:
+			break;
+	}
+	return L"Exception";
 }

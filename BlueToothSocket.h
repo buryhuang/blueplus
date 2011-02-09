@@ -16,6 +16,20 @@ public:
 
 class CBlueToothSocket
 {
+	enum{
+		NOT_CREATED,
+		CREATED,
+		LISTENING,
+		ACCEPTED,
+		CONNECTING,
+		CONNECTION_AUTH_FAILED,
+		CONNECTION_TIMEOUT,
+		CONNECTION_FAILED,
+		CONNECTED,
+		RECV_FAILED,
+		CLOSED
+	};
+
 public:
 	CBlueToothSocket();
 	CBlueToothSocket(SOCKET);
@@ -31,6 +45,7 @@ public:
 	size_t Recveive();
 	size_t Send(BYTEBUFFER buff);
 	bool RegisterHandler(CSocketHandler*);
+	wstring GetStatusString();
 
 protected:
 	SOCKET m_socket;
@@ -39,4 +54,5 @@ protected:
 	BOOL m_bCreated;
 	vector<SOCKET> m_listSocket;
 	CSocketHandler* m_pHandler;
+	int m_iStatus;
 };
