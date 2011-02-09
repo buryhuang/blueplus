@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"  xmlns:dc="http://purl.org/dc/elements/1.1/">
+   <channel>
+      <title>Blue++</title>
+      <link>http://dl.dropbox.com/u/9939776/Blue%2B%2B/appcast.xml</link>
+      <description>Most recent changes with links to updates.</description>
+      <language>en</language>
+         <item>
+            <title>Version 0.1</title>
+						<sparkle:releaseNotesLink>
+							http://dl.dropbox.com/u/9939776/Blue%2B%2B/ReleaseNotes.txt
+						</sparkle:releaseNotesLink>
+            <pubDate>Tue, 08 Feb 2011 18:59:00 -0600</pubDate>
+            <enclosure url="http://db.tt/cdilTdE" sparkle:version="0.1" length="311242" type="application/octet-stream" sparkle:dsaSignature="" />
+         </item>
+   </channel>
+</rss>
