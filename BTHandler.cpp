@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #include "BTHandler.h"
 #include "BTDeviceManager.h"
 
@@ -21,3 +25,5 @@ void CBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstrin
 		}
 	}
 }
+
+/** @}*/

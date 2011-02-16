@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #pragma once
 
 #include "managedthread.h"
@@ -25,3 +29,5 @@ private:
 	static CBTServer* m_instance;
 	CBlueToothSocket m_socket;
 };
+
+/** @}*/

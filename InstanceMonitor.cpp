@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #include "config.h"
 #include "InstanceMonitor.h"
 
@@ -79,3 +83,5 @@ void CInstanceMonitor::GraceShutdown()
 	}
 
 }
+
+/** @}*/

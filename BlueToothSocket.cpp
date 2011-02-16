@@ -1,3 +1,7 @@
+/** \addtogroup bluetooth
+ *  @{
+ */
+
 #include "BlueToothSocket.h"
 
 CBlueToothSocket::CBlueToothSocket(SOCKET s):
@@ -450,3 +454,6 @@ wstring CBlueToothSocket::GetStatusString()
 	}
 	return L"Exception";
 }
+
+
+/** @}*/

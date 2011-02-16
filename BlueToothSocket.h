@@ -1,3 +1,7 @@
+/** \addtogroup bluetooth
+ *  @{
+ */
+
 #pragma once
 
 #include "BlueTooth.h"
@@ -56,3 +60,6 @@ protected:
 	CSocketHandler* m_pHandler;
 	int m_iStatus;
 };
+
+
+/** @}*/

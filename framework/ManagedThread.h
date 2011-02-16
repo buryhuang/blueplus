@@ -1,3 +1,7 @@
+/** \addtogroup framework
+ *  @{
+ */
+
 #pragma once
 
 #include "ManagedObject.h"
@@ -29,3 +33,6 @@ protected:
 
 	CPrivateManagedThread* m_ptrThread;
 };
+
+
+/** @}*/

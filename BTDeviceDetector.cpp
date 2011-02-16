@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #include "config.h"
 #include "BTDeviceDetector.h"
 #include "BTHandler.h"
@@ -30,3 +34,5 @@ int CBTDeviceDetector::Run()
 
 	return 0;
 }
+
+/** @}*/

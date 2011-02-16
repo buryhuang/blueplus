@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #pragma once
 
 #include "App.h"
@@ -28,3 +32,5 @@ private:
 	vector<CManagedThread*> m_listThreads;
 	static CInstanceMonitor* m_instance;
 };
+
+/** @}*/

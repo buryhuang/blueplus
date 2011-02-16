@@ -1,3 +1,7 @@
+/** \addtogroup bluetooth
+ *  @{
+ */
+
 #include "BlueTooth.h"
 
 #include "Utils.h"
@@ -517,3 +521,6 @@ TEST(BlueToothTest,Init)
 }
 
 #endif
+
+
+/** @}*/
