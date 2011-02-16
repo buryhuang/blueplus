@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #pragma once
 
 #include "ManagedThread.h"
@@ -70,3 +74,5 @@ protected:
 
 	HANDLE m_hMutex;
 };
+
+/** @}*/

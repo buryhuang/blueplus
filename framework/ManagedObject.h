@@ -1,3 +1,7 @@
+/** \addtogroup framework
+ *  @{
+ */
+
 #pragma once
 
 #include <string>
@@ -17,3 +21,5 @@ public:
 protected:
 	wstring m_name;
 };
+
+/** @}*/

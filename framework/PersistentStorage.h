@@ -1,3 +1,7 @@
+/** \addtogroup framework
+ *  @{
+ */
+
 #pragma once
 #include "managedobject.h"
 
@@ -59,3 +63,5 @@ protected:
 };
 
 
+
+/** @}*/

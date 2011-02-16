@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #ifndef _BTHANDLER_H_
 #define _BTHANDLER_H_
 
@@ -14,3 +18,6 @@ public:
 };
 
 #endif
+
+
+/** @}*/

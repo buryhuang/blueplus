@@ -1,3 +1,7 @@
+/** \addtogroup framework
+ *  @{
+ */
+
 #include "PersistentStorage.h"
 #include <iostream>
 #include <string>
@@ -132,3 +136,6 @@ TEST(CPersistentStorageTest,Writing)
 }
 
 #endif
+
+
+/** @}*/

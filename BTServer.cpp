@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #include "BTServer.h"
 #include <iostream>
 #include <fstream>
@@ -124,3 +128,5 @@ TEST(CBTServerTest,GraceShutdown)
 }
 	
 #endif
+
+/** @}*/

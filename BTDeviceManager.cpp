@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #include "config.h"
 #include "BTDeviceManager.h"
 #include <iostream>
@@ -300,3 +304,6 @@ TEST(BTDeviceManagerTest,MTUnregisterDevice)
 }
 
 #endif
+
+
+/** @}*/

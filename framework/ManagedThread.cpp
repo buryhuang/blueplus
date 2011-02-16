@@ -1,3 +1,7 @@
+/** \addtogroup framework
+ *  @{
+ */
+
 #include "ManagedThread.h"
 #include "afxwin.h"
 
@@ -68,3 +72,5 @@ void CManagedThread::Shutdown()
 	TerminateThread(m_ptrThread->m_hThread,0);
 }
 
+
+/** @}*/

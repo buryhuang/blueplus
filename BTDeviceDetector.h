@@ -1,3 +1,7 @@
+/** \addtogroup application
+ *  @{
+ */
+
 #pragma once
 
 #include "ManagedThread.h"
@@ -11,3 +15,5 @@ public:
 	virtual ~CBTDeviceDetector(void);
 	virtual int Run();
 };
+
+/** @}*/
