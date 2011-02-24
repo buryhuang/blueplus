@@ -291,6 +291,23 @@ int CBlueTooth::RunDeviceInquiry(int duration)
         //debug(("doInquiry, notify listener"));
 		OnDeviceDiscovered(deviceAddr, deviceClass, deviceName, paired);
 
+		vector<SdpQueryUuid> v;
+		SdpQueryUuid uid;
+		uid.uuidType = SDP_ST_UUID16;
+		uid.u.uuid16=HandsfreeServiceClassID_UUID16;
+
+		v.push_back(uid);
+		vector<int> handles = RunSearchServices(v,deviceAddr);
+
+		vector<int> attrs;
+		attrs.push_back(0x0000);
+		attrs.push_back(0x0001);
+		attrs.push_back(0x0002);
+
+		for(vector<int>::iterator vi=handles.begin();vi!=handles.end();vi++){
+			GetServiceAttributes(attrs,deviceAddr,*vi);
+		}
+
 		//debug(("doInquiry, listener returns"));
 	}
 
@@ -318,7 +335,6 @@ vector<int> CBlueTooth::RunSearchServices(vector<SdpQueryUuid> uuidSet, BTH_ADDR
 	//debug(("runSearchServices"));
     vector<int> result;
 
-
 	// 	check if we can handle the number of UUIDs supplied
 	if (uuidSet.size() > MAX_UUIDS_IN_QUERY) {
 		return result;
@@ -327,25 +343,18 @@ vector<int> CBlueTooth::RunSearchServices(vector<SdpQueryUuid> uuidSet, BTH_ADDR
 	// 	generate a Bluetooth address string (WSAAddressToString doesn't work on WinCE)
 
 	WCHAR addressString[20];
-
 	swprintf_s(addressString, L"(%02x:%02x:%02x:%02x:%02x:%02x)", (int)(address>>40&0xff), (int)(address>>32&0xff), (int)(address>>24&0xff), (int)(address>>16&0xff), (int)(address>>8&0xff), (int)(address&0xff));
 
 	//	build service query
 
 	BTH_QUERY_SERVICE queryservice;
-
 	memset(&queryservice, 0, sizeof(queryservice));
-
 	queryservice.type = SDP_SERVICE_SEARCH_REQUEST;
 
-	for(int i = 0; uuidSet.size(); i++) {
-
+	for(int i = 0; i<uuidSet.size(); i++) {
 		//UUID is full 128 bits
-
-		queryservice.uuids[i].uuidType = SDP_ST_UUID128;
-
-		queryservice.uuids[i].u.uuid128 = uuidSet[i].u.uuid128;
-
+		queryservice.uuids[i].uuidType = SDP_ST_UUID16;
+		queryservice.uuids[i].u.uuid16 = uuidSet[i].u.uuid16;
 	}
 
 	// build BLOB pointing to service query

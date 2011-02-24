@@ -27,6 +27,40 @@ typedef string BYTEBUFFER;
 #define INQUIRY_ERROR 7
 
 
+//BT stack uuid
+#define SyncMLClient_UUID 0x0002
+#define ServiceDiscoveryServerServiceClassID_UUID16     0x1000
+#define BrowseGroupDescriptorServiceClassID_UUID16      0x1001
+#define PublicBrowseGroupServiceClassID_UUID16          0x1002
+#define SerialPortServiceClassID_UUID16                 0x1101
+#define LANAccessUsingPPPServiceClassID_UUID16          0x1102
+#define DialupNetworkingServiceClassID_UUID16           0x1103
+#define IrMCSyncServiceClassID_UUID16                   0x1104
+#define OBEXObjectPushServiceClassID_UUID16             0x1105
+#define OBEXFileTransferServiceClassID_UUID16           0x1106
+#define IrMcSyncCommandServiceClassID_UUID16            0x1107
+#define HeadsetServiceClassID_UUID16                    0x1108
+#define CordlessServiceClassID_UUID16                   0x1109
+#define AudioSourceServiceClassID_UUID16                0x110A
+#define AudioSinkServiceClassID_UUID16                  0x110B
+#define AV_RemoteControlTargetServiceClassID_UUID16     0x110C
+#define AdvancedAudioDistributionServiceClassID_UUID16  0x110D
+#define AV_RemoteControlServiceClassID_UUID16           0x110E
+#define VideoConferencingServiceClassID_UUID16          0x110F
+#define IntercomServiceClassID_UUID16                   0x1110
+#define FaxServiceClassID_UUID16                        0x1111
+#define HeadsetAudioGatewayServiceClassID_UUID16        0x1112
+#define PANUServiceClassID_UUID16                       0x1115
+#define NAPServiceClassID_UUID16                        0x1116
+#define GNServiceClassID_UUID16                         0x1117
+#define HandsfreeServiceClassID_UUID16                  0x111E
+#define HandsfreeAudioGatewayServiceClassID_UUID16      0x111F
+#define PnPInformationServiceClassID_UUID16             0x1200
+#define GenericNetworkingServiceClassID_UUID16          0x1201
+#define GenericFileTransferServiceClassID_UUID16        0x1202
+#define GenericAudioServiceClassID_UUID16               0x1203
+#define GenericTelephonyServiceClassID_UUID16           0x1204
+
 
 class CBlueTooth
 {
