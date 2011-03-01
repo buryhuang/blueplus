@@ -25,12 +25,12 @@ void CBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstrin
 		}
 	}
 
-	if(RunSearchServices()==FALSE){
+	if(RunSearchServices(deviceAddr)==FALSE){
 		Utils::ShowError(L"CBTHandler::OnDeviceDiscovered");
 	}
 }
 
-void CBTHandler::OnServiceDiscovered(vector<ServiceRecord> serviceList)
+void CBTHandler::OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord> serviceList)
 {
 	for(vector<ServiceRecord>::iterator vi=serviceList.begin();vi!=serviceList.end();vi++){
 		wcout<<vi->serviceInstanceName
@@ -39,6 +39,7 @@ void CBTHandler::OnServiceDiscovered(vector<ServiceRecord> serviceList)
 			<<L"-"<<vi->sockaddrBth.port
 			<<endl;
 	}
+	DEF_BTDEV_MGR->UpdateServices(deviceAddr, serviceList);
 }
 
 /** @}*/

@@ -16,8 +16,8 @@ class CDevMgrBTHandlerThread:public CSocketHandler, public CManagedThread
 {
 public:
 
-	CDevMgrBTHandlerThread::CDevMgrBTHandlerThread(wstring name,BTH_ADDR addr)
-		:CManagedThread(name),m_addrBth(addr){}
+	CDevMgrBTHandlerThread::CDevMgrBTHandlerThread(wstring name,SOCKADDR_BTH sockaddr)
+		:CManagedThread(name),m_sockaddrBth(sockaddr){}
 	virtual void OnAccept(SOCKET s){}
 	virtual void OnReceive(SOCKET s, BYTEBUFFER buff);
 	virtual void OnConnect(){};
@@ -25,7 +25,7 @@ public:
 	virtual int Run();
 	wstring GetStatusString(){return m_pSocket->GetStatusString();}
 private:
-	BTH_ADDR m_addrBth;
+	SOCKADDR_BTH m_sockaddrBth;
 	CBlueToothSocket * m_pSocket;
 };
 
@@ -38,6 +38,7 @@ public:
 	bool m_bPaired;
 	wstring m_deviceName;
 	int m_iDeviceClass;
+	vector<ServiceRecord> m_listService;
 };
 
 typedef map<BTH_ADDR, CBTDevice*> BT_DEV_MAP;
@@ -57,6 +58,8 @@ public:
 	virtual bool UnregisterDevice(BTH_ADDR deviceAddr);
 	virtual bool UpdateDevice(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
 	virtual bool UpdateDevice(CBTDevice* pDevice);
+
+	virtual bool UpdateServices(BTH_ADDR deviceAddr, vector<ServiceRecord> serviceList);
 
 	virtual BT_DEV_MAP GetDeviceMap();
 	void ListDevices();

@@ -170,7 +170,7 @@ bool CBlueTooth::InitializationStatus() {
     return FALSE;
 }
 
-bool CBlueTooth::GetBluetoothGetRadioInfo(long address, BLUETOOTH_RADIO_INFO* info) {
+bool CBlueTooth::GetBluetoothGetRadioInfo(BTH_ADDR address, BLUETOOTH_RADIO_INFO* info) {
 	HANDLE hRadio;
 	BLUETOOTH_FIND_RADIO_PARAMS btfrp = { sizeof(btfrp) };
 	HBLUETOOTH_RADIO_FIND hFind = BluetoothFindFirstRadio( &btfrp, &hRadio );
@@ -187,6 +187,37 @@ bool CBlueTooth::GetBluetoothGetRadioInfo(long address, BLUETOOTH_RADIO_INFO* in
 			}
 		} while( BluetoothFindNextRadio( hFind, &hRadio ) );
 		BluetoothFindRadioClose( hFind );
+	}
+	return FALSE;
+}
+
+bool CBlueTooth::getBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO* pbtdi, BOOL issueInquiry) {
+	BLUETOOTH_DEVICE_SEARCH_PARAMS btsp;
+	memset(&btsp, 0, sizeof(btsp));
+    btsp.dwSize = sizeof(btsp);
+    btsp.fIssueInquiry = issueInquiry;
+	btsp.fReturnAuthenticated = true;
+    btsp.fReturnConnected     = true;
+    btsp.fReturnRemembered    = true;
+    btsp.fReturnUnknown       = true;
+    if (issueInquiry) {
+        btsp.cTimeoutMultiplier = 10;
+    }
+
+    memset(pbtdi, 0, sizeof(BLUETOOTH_DEVICE_INFO));
+	pbtdi->dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
+	HBLUETOOTH_DEVICE_FIND hFind = BluetoothFindFirstDevice(&btsp, pbtdi);
+	if (NULL != hFind) {
+		do {
+			if (pbtdi->Address.ullLong == address) {
+			    BluetoothFindDeviceClose(hFind);
+				return TRUE;
+            }
+			printf("found device %i", pbtdi->Address.ullLong);
+			memset(pbtdi, 0, sizeof(BLUETOOTH_DEVICE_INFO));
+	        pbtdi->dwSize = sizeof(BLUETOOTH_DEVICE_INFO);
+		} while (BluetoothFindNextDevice(hFind, pbtdi));
+        BluetoothFindDeviceClose(hFind);
 	}
 	return FALSE;
 }
@@ -377,7 +408,7 @@ void CBlueTooth::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstrin
 	//MessageBox(NULL,deviceName.c_str(),0,0);
 }
 
-void CBlueTooth::OnServiceDiscovered(vector<ServiceRecord>)
+void CBlueTooth::OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord>)
 {
 	//TRACE("%x - %s\n",(unsigned long)deviceAddr, deviceName.c_str());
 	//MessageBox(NULL,deviceName.c_str(),0,0);
@@ -406,7 +437,7 @@ BOOL __stdcall callback(ULONG uAttribId, LPBYTE pValueStream, ULONG cbStreamSize
 	}
 }
 
-bool CBlueTooth::RunSearchServices()
+bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 {
 	vector<ServiceRecord> serviceList;
 
@@ -430,7 +461,7 @@ bool CBlueTooth::RunSearchServices()
 	// Load the winsock2 library
 	if (WSAStartup(MAKEWORD(2,2), &m_data) == 0)
 	{
-		printf("WSAStartup() should be fine!\n");
+		//printf("WSAStartup() should be fine!\n");
 
 		// Create a blutooth socket
 		s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
@@ -439,8 +470,9 @@ bool CBlueTooth::RunSearchServices()
 			printf("Failed to get bluetooth socket with error code %ld\n", WSAGetLastError());
 			return FALSE;
 		}
-		else
-			printf("socket() is OK!\n");
+		else{
+			//printf("socket() is OK!\n");
+		}
 
 		protocolInfoSize = sizeof(protocolInfo);
 
@@ -450,8 +482,9 @@ bool CBlueTooth::RunSearchServices()
 			printf("getsockopt(SO_PROTOCOL_INFO) failed with error code %ld\n", WSAGetLastError());
 			return FALSE;
 		}
-		else
-			printf("getsockopt(SO_PROTOCOL_INFO) is OK!\n");
+		else{
+			//printf("getsockopt(SO_PROTOCOL_INFO) is OK!\n");
+		}
 
 		// Query set criteria
 		memset(&querySet, 0, sizeof(querySet));
@@ -468,7 +501,7 @@ bool CBlueTooth::RunSearchServices()
 		// If OK
 		if (result == 0)
 		{
-			printf("          WSALookupServiceBegin() is OK!\n");
+//			printf("          WSALookupServiceBegin() is OK!\n");
 			i = 0;
 
 			while (result == 0)
@@ -485,8 +518,8 @@ bool CBlueTooth::RunSearchServices()
 				else
 				{
 					// Get the device info, name, address etc
-					printf("          WSALookupServiceNext() is OK!\n");
-					printf("          The service instance name is %S\n", pResults->lpszServiceInstanceName);
+					//printf("          WSALookupServiceNext() is OK!\n");
+					//printf("          The service instance name is %S\n", pResults->lpszServiceInstanceName);
 					pCSAddr = (CSADDR_INFO *)pResults->lpcsaBuffer;
 					pDeviceInfo = (BTH_DEVICE_INFO *)pResults->lpBlob;
 					memset(&querySet2, 0, sizeof(querySet2));
@@ -501,11 +534,12 @@ bool CBlueTooth::RunSearchServices()
 					if (WSAAddressToString(pCSAddr->LocalAddr.lpSockaddr, pCSAddr->LocalAddr.iSockaddrLength,
 									 &protocolInfo, (LPWSTR)addressAsString, &addressSize) == 0)
 					{
-					   printf("          WSAAddressToString() for local address is fine!\n");
-					   printf("          The local address: %S\n", addressAsString);
+					   //printf("          WSAAddressToString() for local address is fine!\n");
+					   //printf("          The local address: %S\n", addressAsString);
 					}
-					else
-					   printf("          WSAAddressToString() for local address failed with error code %ld\n", WSAGetLastError());
+					else{
+					   //printf("          WSAAddressToString() for local address failed with error code %ld\n", WSAGetLastError());
+					}
 
 					addressSize = sizeof(addressAsString);
 
@@ -513,85 +547,91 @@ bool CBlueTooth::RunSearchServices()
 					if (WSAAddressToString(pCSAddr->RemoteAddr.lpSockaddr, pCSAddr->RemoteAddr.iSockaddrLength,
 								&protocolInfo, (LPWSTR)addressAsString, &addressSize) == 0)
 					{
-						printf("          WSAAddressToString() for remote address is fine!\n");
-						printf("          The remote device address: %S\n", addressAsString);
+						//printf("          WSAAddressToString() for remote address is fine!\n");
+						//printf("          The remote device address: %S\n", addressAsString);
 					}
-					else
-						printf("          WSAAddressToString() for remote address failed with error code %ld\n", WSAGetLastError());
+					else{
+						//printf("          WSAAddressToString() for remote address failed with error code %ld\n", WSAGetLastError());
+					}
 
-					// Prepare for service query set
-					querySet2.lpszContext = (LPWSTR)addressAsString;
-
-					flags = LUP_FLUSHCACHE |LUP_RETURN_NAME | LUP_RETURN_TYPE |
-															 LUP_RETURN_ADDR | LUP_RETURN_BLOB | LUP_RETURN_COMMENT;
-
-					// Start service query
-					result = WSALookupServiceBegin(&querySet2, flags, &hLookup2);
-					if (result == 0)
+					if(address ==((SOCKADDR_BTH *)(pCSAddr->RemoteAddr.lpSockaddr))->btAddr)
 					{
-						printf("          WSALookupServiceBegin() is OK!\n");
-						while (result == 0)
+						// Prepare for service query set
+						querySet2.lpszContext = (LPWSTR)addressAsString;
+
+						flags = LUP_FLUSHCACHE |LUP_RETURN_NAME | LUP_RETURN_TYPE |
+																 LUP_RETURN_ADDR | LUP_RETURN_BLOB | LUP_RETURN_COMMENT;
+
+						// Start service query
+						result = WSALookupServiceBegin(&querySet2, flags, &hLookup2);
+						if (result == 0)
 						{
-							bufferLength1 = sizeof(buffer1);
-							pResults = (WSAQUERYSET *)&buffer1;
-
-							// Next service query
-							result = WSALookupServiceNext(hLookup2, flags, &bufferLength1, pResults);
-
-							if(result == 0)
+							//printf("          WSALookupServiceBegin() is OK!\n");
+							while (result == 0)
 							{
-								ServiceRecord sr;
-								// Populate the service info
-								//printf("          WSALookupServiceNext() is OK!\n");
-								//printf("          WSALookupServiceNext() - service instance name: %S\n",
-								//			pResults->lpszServiceInstanceName);
-								//printf("          WSALookupServiceNext() - comment (if any): %s\n", pResults->lpszComment);
-								//printf("          WSALookupServiceNext() - port (if any): %x\n", ((SOCKADDR_BTH *)pResults->lpcsaBuffer->RemoteAddr.lpSockaddr)->port);
-								pCSAddr = (CSADDR_INFO *)pResults->lpcsaBuffer;
+								bufferLength1 = sizeof(buffer1);
+								pResults = (WSAQUERYSET *)&buffer1;
 
-								sr.serviceInstanceName=pResults->lpszServiceInstanceName;
-								sr.comment=pResults->lpszComment;
-								sr.sockaddrBth = *((SOCKADDR_BTH *)pResults->lpcsaBuffer->RemoteAddr.lpSockaddr);
+								// Next service query
+								result = WSALookupServiceNext(hLookup2, flags, &bufferLength1, pResults);
 
-								serviceList.push_back(sr);
-
-								// Extract the sdp info
-								if (pResults->lpBlob)
+								if(result == 0)
 								{
-									pBlob = (BLOB*)pResults->lpBlob;
-									if (!BluetoothSdpEnumAttributes(pBlob->pBlobData, pBlob->cbSize, callback, 0))
+									ServiceRecord sr;
+									// Populate the service info
+									//printf("          WSALookupServiceNext() is OK!\n");
+									//printf("          WSALookupServiceNext() - service instance name: %S\n",
+									//			pResults->lpszServiceInstanceName);
+									//printf("          WSALookupServiceNext() - comment (if any): %s\n", pResults->lpszComment);
+									//printf("          WSALookupServiceNext() - port (if any): %x\n", ((SOCKADDR_BTH *)pResults->lpcsaBuffer->RemoteAddr.lpSockaddr)->port);
+									pCSAddr = (CSADDR_INFO *)pResults->lpcsaBuffer;
+
+									sr.serviceInstanceName=pResults->lpszServiceInstanceName;
+									sr.comment=pResults->lpszComment;
+									sr.sockaddrBth = *((SOCKADDR_BTH *)pResults->lpcsaBuffer->RemoteAddr.lpSockaddr);
+
+									serviceList.push_back(sr);
+
+									// Extract the sdp info
+									if (pResults->lpBlob)
 									{
-										printf("BluetoothSdpEnumAttributes() failed with error code %ld\n", WSAGetLastError());
-									}
-									else
-									{
-										printf("BluetoothSdpEnumAttributes() #%d is OK!\n", i++);
+										pBlob = (BLOB*)pResults->lpBlob;
+										if (!BluetoothSdpEnumAttributes(pBlob->pBlobData, pBlob->cbSize, callback, 0))
+										{
+											printf("BluetoothSdpEnumAttributes() failed with error code %ld\n", WSAGetLastError());
+										}
+										else
+										{
+											//printf("BluetoothSdpEnumAttributes() #%d is OK!\n", i++);
+										}
 									}
 								}
+								else
+								{
+									printf("          WSALookupServiceNext() failed with error code %ld\n", WSAGetLastError());
+									printf("          Error code = 11011 ~ WSA_E_NO_MORE ~ No more device!\n");
+								}
 							}
-							else
-							{
-								printf("          WSALookupServiceNext() failed with error code %ld\n", WSAGetLastError());
-								printf("          Error code = 11011 ~ WSA_E_NO_MORE ~ No more device!\n");
+
+							// Close the handle to service query
+							if(WSALookupServiceEnd(hLookup2) == 0){
+								//printf("WSALookupServiceEnd(hLookup2) is fine!\n", WSAGetLastError());
+							}else{
+								printf("WSALookupServiceEnd(hLookup2) failed with error code %ld\n");
 							}
 						}
-
-						// Close the handle to service query
-						if(WSALookupServiceEnd(hLookup2) == 0)
-							printf("WSALookupServiceEnd(hLookup2) is fine!\n", WSAGetLastError());
 						else
-							printf("WSALookupServiceEnd(hLookup2) failed with error code %ld\n");
+							printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
 					}
-					else
-						printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
 				}
 			}
 
 			// Close handle to the device query
-			if(WSALookupServiceEnd(hLookup) == 0)
-				printf("WSALookupServiceEnd(hLookup) is fine!\n", WSAGetLastError());
-			else
+			if(WSALookupServiceEnd(hLookup) == 0){
+				//printf("WSALookupServiceEnd(hLookup) is fine!\n", WSAGetLastError());
+			}else{
 				printf("WSALookupServiceEnd(hLookup) failed with error code %ld\n");
+			}
 		}
 		else
 		{
@@ -599,13 +639,14 @@ bool CBlueTooth::RunSearchServices()
 		}// end WSALookupServiceBegin()
 
 		// Cleanup the winsock library startup
-		if(WSACleanup() == 0)
-			printf("WSACleanup() pretty fine!\n");
-		else
+		if(WSACleanup() == 0){
+			//printf("WSACleanup() pretty fine!\n");
+		}else{
 			printf("WSACleanup() failed with error code %ld\n", WSAGetLastError());
+		}
 	} // end WSAStartup()
 
-	OnServiceDiscovered(serviceList);
+	OnServiceDiscovered(address, serviceList);
 	return TRUE;
 }
 

@@ -18,8 +18,9 @@ int CDevMgrBTHandlerThread::Run()
 {
 	m_pSocket = new CBlueToothSocket();
 	m_pSocket->RegisterHandler(this);
-	m_pSocket->Create(FALSE,FALSE);
-	m_pSocket->Connect(m_addrBth,1,10);
+	m_pSocket->Create(TRUE,FALSE);
+	m_pSocket->SetPasskey(L"0000");
+	m_pSocket->Connect(m_sockaddrBth.btAddr,m_sockaddrBth.port,10);
 
 	//Thread main loop
 	while(m_pSocket->Recveive());
@@ -94,8 +95,10 @@ int CBTDeviceManager::Run()
 				cnt++;
 
 				if(pDev->m_pSockHandler == NULL){
-					pDev->m_pSockHandler = new CDevMgrBTHandlerThread(L"DevManager BT Handler", pDev->m_addrBth);
-					pDev->m_pSockHandler->Start();
+					if(pDev->m_listService.size()>0){
+						pDev->m_pSockHandler = new CDevMgrBTHandlerThread(L"DevManager BT Handler", pDev->m_listService[0].sockaddrBth);
+						pDev->m_pSockHandler->Start();
+					}
 				}
 
 				else if(pDev->m_pSockHandler->IsAlive()){
@@ -114,6 +117,23 @@ int CBTDeviceManager::Run()
 	}
 	return 0;
 }
+
+bool CBTDeviceManager::UpdateServices(BTH_ADDR deviceAddr, vector<ServiceRecord> serviceList)
+{
+	if(m_mapBTDevice.find(deviceAddr)==m_mapBTDevice.end()){
+		return FALSE;
+	}
+
+	WaitForSingleObject(m_hMutex,INFINITE);
+	CBTDevice* pDevice = m_mapBTDevice[deviceAddr];
+	
+	pDevice->m_listService = serviceList;
+
+	ReleaseMutex(m_hMutex);
+	
+	return TRUE;
+}
+
 
 bool CBTDeviceManager::RegisterDevice(CBTDevice* pDevice)
 {
