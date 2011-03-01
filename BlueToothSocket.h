@@ -50,6 +50,7 @@ public:
 	size_t Send(BYTEBUFFER buff);
 	bool RegisterHandler(CSocketHandler*);
 	wstring GetStatusString();
+	void SetPasskey(wstring passkey);
 
 protected:
 	SOCKET m_socket;
@@ -59,6 +60,9 @@ protected:
 	vector<SOCKET> m_listSocket;
 	CSocketHandler* m_pHandler;
 	int m_iStatus;
+	wstring m_passkey;
+	BOOL m_bAuth;
+	HBLUETOOTH_AUTHENTICATION_REGISTRATION m_hAuth;
 };
 
 

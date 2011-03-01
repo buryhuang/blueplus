@@ -15,7 +15,7 @@ public:
 	virtual ~CBTHandler(void);
 
 	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
-	virtual void OnServiceDiscovered(vector<ServiceRecord>);
+	virtual void OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord>);
 
 };
 

@@ -8,7 +8,8 @@ CBlueToothSocket::CBlueToothSocket(SOCKET s):
 	m_bStarted(TRUE),
 	m_bConnected(TRUE),
 	m_bCreated(TRUE),
-	m_pHandler(NULL)
+	m_pHandler(NULL),
+	m_bAuth(FALSE)
 {
 	if(s!=INVALID_SOCKET){
 		m_socket=s;
@@ -25,7 +26,8 @@ CBlueToothSocket::CBlueToothSocket(void):
 	m_bCreated(FALSE),
 	m_pHandler(NULL),
 	m_iStatus(NOT_CREATED),
-	m_socket(INVALID_SOCKET)
+	m_socket(INVALID_SOCKET),
+	m_bAuth(FALSE)
 {
 	WSADATA data;
 	if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
@@ -63,6 +65,7 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 #ifndef LOOPBACK_TEST
 	if (authenticate) {
 		ULONG ul = TRUE;
+		m_bAuth = TRUE;
 
 		if (setsockopt(s, SOL_RFCOMM, SO_BTH_AUTHENTICATE, (char *)&ul, sizeof(ULONG))) {
 			closesocket(s);
@@ -98,6 +101,41 @@ BOOL CBlueToothSocket::Connect(BTH_ADDR address, int channel, int retryUnreachab
     //debug(("socket[%u] connect", (int)socket));
 
 	m_iStatus = CONNECTING;
+
+	if(m_bAuth){
+		BLUETOOTH_DEVICE_INFO btdi;
+		CBlueTooth::getBluetoothDeviceInfo(address,&btdi,FALSE);
+		if(m_passkey.size()>0){
+			switch(BluetoothAuthenticateDevice(NULL, NULL, &btdi, &m_passkey[0], m_passkey.size()))
+			{
+				case ERROR_SUCCESS:
+				case ERROR_NO_MORE_ITEMS:
+					printf("successful");
+					break;
+				case ERROR_CANCELLED:
+					printf("cancelled");
+					break;
+				case ERROR_INVALID_PARAMETER:
+					printf("Invalid param");
+					break;
+			};//Will auth on all radios
+		}else{
+			switch(BluetoothAuthenticateDevice(NULL, NULL, &btdi, NULL, 0))
+			{
+				case ERROR_SUCCESS:
+				case ERROR_NO_MORE_ITEMS:
+					printf("successful");
+					break;
+				case ERROR_CANCELLED:
+					printf("cancelled");
+					break;
+				case ERROR_INVALID_PARAMETER:
+					printf("Invalid param");
+					break;
+			};//Will auth on all radios
+		}
+
+	}
 
 
 #ifndef LOOPBACK_TEST
@@ -453,6 +491,11 @@ wstring CBlueToothSocket::GetStatusString()
 			break;
 	}
 	return L"Exception";
+}
+
+void CBlueToothSocket::SetPasskey(wstring passkey)
+{
+	m_passkey = passkey;
 }
 
 

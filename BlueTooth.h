@@ -80,11 +80,15 @@ public:
 	int GetDeviceManufacturer(long address);
 	
 	int RunDeviceInquiry(int duration);
-	bool RunSearchServices();
+	bool RunSearchServices(BTH_ADDR address);
 	vector<char> GetServiceAttributes(vector<int> attrIDs, BTH_ADDR address, int handle);
 
+	static bool GetBluetoothGetRadioInfo(BTH_ADDR address, BLUETOOTH_RADIO_INFO* info);
+	static bool CBlueTooth::getBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO* pbtdi, BOOL issueInquiry);
+
+
 	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
-	virtual void CBlueTooth::OnServiceDiscovered(vector<ServiceRecord>);
+	virtual void OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord>);
 
 	bool GetLocalAddress(SOCKADDR_BTH&);
 
@@ -98,7 +102,7 @@ protected:
 	bool m_bRestoreBtMode;
 
 	bool IsBluetoothStackPresent();
-	bool GetBluetoothGetRadioInfo(long address, BLUETOOTH_RADIO_INFO* info);
+
 };
 
 #endif
