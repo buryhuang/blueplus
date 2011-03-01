@@ -28,7 +28,7 @@ typedef string BYTEBUFFER;
 
 
 //BT stack uuid
-#define SyncMLClient_UUID 0x0002
+#define SyncMLClient_UUID16                             0x0002
 #define ServiceDiscoveryServerServiceClassID_UUID16     0x1000
 #define BrowseGroupDescriptorServiceClassID_UUID16      0x1001
 #define PublicBrowseGroupServiceClassID_UUID16          0x1002
@@ -61,6 +61,12 @@ typedef string BYTEBUFFER;
 #define GenericAudioServiceClassID_UUID16               0x1203
 #define GenericTelephonyServiceClassID_UUID16           0x1204
 
+struct ServiceRecord
+{
+	wstring serviceInstanceName;
+	wstring comment;
+	SOCKADDR_BTH sockaddrBth;
+};
 
 class CBlueTooth
 {
@@ -74,12 +80,15 @@ public:
 	int GetDeviceManufacturer(long address);
 	
 	int RunDeviceInquiry(int duration);
-	vector<int> RunSearchServices(vector<SdpQueryUuid> uuidSet, BTH_ADDR address);
+	bool RunSearchServices();
 	vector<char> GetServiceAttributes(vector<int> attrIDs, BTH_ADDR address, int handle);
 
 	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
+	virtual void CBlueTooth::OnServiceDiscovered(vector<ServiceRecord>);
 
 	bool GetLocalAddress(SOCKADDR_BTH&);
+
+	static vector<int> BTServiceUuid16List;
 
 protected:
 	bool m_bBluetoothStackPresent;

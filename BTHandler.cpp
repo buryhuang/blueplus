@@ -24,6 +24,21 @@ void CBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstrin
 			wcout<<L"Updating failed"<<endl;
 		}
 	}
+
+	if(RunSearchServices()==FALSE){
+		Utils::ShowError(L"CBTHandler::OnDeviceDiscovered");
+	}
+}
+
+void CBTHandler::OnServiceDiscovered(vector<ServiceRecord> serviceList)
+{
+	for(vector<ServiceRecord>::iterator vi=serviceList.begin();vi!=serviceList.end();vi++){
+		wcout<<vi->serviceInstanceName
+			<<L"-"<<vi->comment
+			<<L"-"<<vi->sockaddrBth.btAddr
+			<<L"-"<<vi->sockaddrBth.port
+			<<endl;
+	}
 }
 
 /** @}*/
