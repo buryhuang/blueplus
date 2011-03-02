@@ -68,6 +68,19 @@ struct ServiceRecord
 	SOCKADDR_BTH sockaddrBth;
 };
 
+class CBTHandler
+{
+public:
+	CBTHandler(void){};
+	virtual ~CBTHandler(void){};
+
+	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)=0;
+	virtual void OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord>)=0;
+
+};
+
+#define DEF_BTDEVICE CBlueTooth::GetInstance()
+
 class CBlueTooth
 {
 public:
@@ -82,17 +95,25 @@ public:
 	int RunDeviceInquiry(int duration);
 	bool RunSearchServices(BTH_ADDR address);
 	vector<char> GetServiceAttributes(vector<int> attrIDs, BTH_ADDR address, int handle);
+	bool RegisterHandler(CBTHandler* pHandler);
 
 	static bool GetBluetoothGetRadioInfo(BTH_ADDR address, BLUETOOTH_RADIO_INFO* info);
 	static bool CBlueTooth::getBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO* pbtdi, BOOL issueInquiry);
 
 
-	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
-	virtual void OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord>);
+	//virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
+	//virtual void OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord>);
 
 	bool GetLocalAddress(SOCKADDR_BTH&);
 
 	static vector<int> BTServiceUuid16List;
+
+	static CBlueTooth* GetInstance(){
+		if(m_instance==NULL){
+			m_instance = new CBlueTooth();
+		}
+		return m_instance;
+	}
 
 protected:
 	bool m_bBluetoothStackPresent;
@@ -102,6 +123,8 @@ protected:
 	bool m_bRestoreBtMode;
 
 	bool IsBluetoothStackPresent();
+	CBTHandler* m_pHandler;
+	static CBlueTooth* m_instance;
 
 };
 

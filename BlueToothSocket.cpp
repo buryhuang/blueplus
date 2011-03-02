@@ -441,7 +441,6 @@ size_t CBlueToothSocket::Send(BYTEBUFFER buff)
 
 }
 
-
 bool CBlueToothSocket::RegisterHandler(CSocketHandler* pHandler)
 {
 	if(pHandler!=NULL){

@@ -11,13 +11,15 @@
 using namespace std;
 
 vector<int> CBlueTooth::BTServiceUuid16List;
+CBlueTooth* CBlueTooth::m_instance=NULL;
 
 CBlueTooth::CBlueTooth(void):
 	m_bBluetoothStackPresent(FALSE),
 	m_bStarted(FALSE),
 	m_hDeviceLookup(NULL),
 	m_bInitialBtIsDiscoverable(FALSE),
-	m_bRestoreBtMode(FALSE)
+	m_bRestoreBtMode(FALSE),
+	m_pHandler(NULL)
 {
 	WSADATA data;
 	if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
@@ -359,7 +361,9 @@ int CBlueTooth::RunDeviceInquiry(int duration)
 
 		// notify listener
         //debug(("doInquiry, notify listener"));
-		OnDeviceDiscovered(deviceAddr, deviceClass, deviceName, paired);
+		if(m_pHandler != NULL){
+			m_pHandler->OnDeviceDiscovered(deviceAddr, deviceClass, deviceName, paired);
+		}
 
 #if 0
 
@@ -402,17 +406,6 @@ int CBlueTooth::RunDeviceInquiry(int duration)
 
 }
 
-void CBlueTooth::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)
-{
-	//TRACE("%x - %s\n",(unsigned long)deviceAddr, deviceName.c_str());
-	//MessageBox(NULL,deviceName.c_str(),0,0);
-}
-
-void CBlueTooth::OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord>)
-{
-	//TRACE("%x - %s\n",(unsigned long)deviceAddr, deviceName.c_str());
-	//MessageBox(NULL,deviceName.c_str(),0,0);
-}
 
 // callback for BluetoothSdpEnumAttributes()
 BOOL __stdcall callback(ULONG uAttribId, LPBYTE pValueStream, ULONG cbStreamSize, LPVOID pvParam)
@@ -617,7 +610,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 							if(WSALookupServiceEnd(hLookup2) == 0){
 								//printf("WSALookupServiceEnd(hLookup2) is fine!\n", WSAGetLastError());
 							}else{
-								printf("WSALookupServiceEnd(hLookup2) failed with error code %ld\n");
+								printf("WSALookupServiceEnd(hLookup2) failed with error code %ld\n", WSAGetLastError());
 							}
 						}
 						else
@@ -630,7 +623,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 			if(WSALookupServiceEnd(hLookup) == 0){
 				//printf("WSALookupServiceEnd(hLookup) is fine!\n", WSAGetLastError());
 			}else{
-				printf("WSALookupServiceEnd(hLookup) failed with error code %ld\n");
+				printf("WSALookupServiceEnd(hLookup) failed with error code %ld\n", WSAGetLastError());
 			}
 		}
 		else
@@ -646,7 +639,9 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 		}
 	} // end WSAStartup()
 
-	OnServiceDiscovered(address, serviceList);
+	if(m_pHandler!=NULL){
+		m_pHandler->OnServiceDiscovered(address, serviceList);
+	}
 	return TRUE;
 }
 
@@ -861,6 +856,14 @@ vector<char> CBlueTooth::GetServiceAttributes(vector<int> attrIDs, BTH_ADDR addr
 }
 
 
+bool CBlueTooth::RegisterHandler(CBTHandler* pHandler)
+{
+	if(pHandler!=NULL){
+		m_pHandler = pHandler;
+		return TRUE;
+	}
+	return FALSE;
+}
 
 #ifdef UNITTEST
 #include "unittest_config.h"

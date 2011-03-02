@@ -41,11 +41,8 @@ void CInstanceMonitor::AppStart()
 	LOGSVREVENT(0,L"Starting App");
 
 	//Register services
-	CBTDeviceDetector* pBTDeviceDetector=new CBTDeviceDetector(L"BT Device Detector");
-	this->m_listThreads.push_back(pBTDeviceDetector);
-
+	this->m_listThreads.push_back(DEF_BTDETECTOR);
 	this->m_listThreads.push_back(DEF_BTDEV_MGR);
-
 	this->m_listThreads.push_back(DEF_BTSERVER);
 
 	//Start services
