@@ -11,6 +11,27 @@
 using namespace std;
 
 #define DEF_BTDEV_MGR CBTDeviceManager::GetInstance(L"BT Device Manager")
+#define DEF_BTDEV_HANDLER CBTDeviceMgrBTHandler::GetInstance()
+
+class CBTDeviceMgrBTHandler :
+	public CBTHandler
+{
+public:
+	CBTDeviceMgrBTHandler(void);
+	virtual ~CBTDeviceMgrBTHandler(void);
+
+	virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);
+	virtual void OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord>);
+
+	static CBTDeviceMgrBTHandler* GetInstance(){
+		if(m_instance==NULL){
+			m_instance = new CBTDeviceMgrBTHandler();
+		}
+		return m_instance;
+	}
+protected:
+	static CBTDeviceMgrBTHandler* m_instance;
+};
 
 class CDevMgrBTHandlerThread:public CSocketHandler, public CManagedThread
 {

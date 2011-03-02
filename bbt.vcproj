@@ -378,10 +378,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\BTHandler.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\BTServer.cpp"
 				>
 			</File>
@@ -481,10 +477,6 @@
 			</File>
 			<File
 				RelativePath=".\BTDeviceManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BTHandler.h"
 				>
 			</File>
 			<File

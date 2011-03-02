@@ -8,6 +8,41 @@
 
 using namespace std;
 
+CBTDeviceMgrBTHandler* CBTDeviceMgrBTHandler::m_instance=NULL;
+
+CBTDeviceMgrBTHandler::CBTDeviceMgrBTHandler(void)
+{
+}
+
+CBTDeviceMgrBTHandler::~CBTDeviceMgrBTHandler(void)
+{
+}
+
+void CBTDeviceMgrBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)
+{
+	wcout<<hex<<deviceAddr<<" - "<<deviceName<<endl;
+	if(DEF_BTDEV_MGR->RegisterDevice(deviceAddr, deviceClass, deviceName, paired)!=TRUE){
+		wcout<<L"Registering failed"<<endl;
+		if(DEF_BTDEV_MGR->UpdateDevice(deviceAddr, deviceClass, deviceName, paired)!=TRUE){
+			wcout<<L"Updating failed"<<endl;
+		}
+	}
+
+	DEF_BTDEVICE->RunSearchServices(deviceAddr);
+}
+
+void CBTDeviceMgrBTHandler::OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord> serviceList)
+{
+	for(vector<ServiceRecord>::iterator vi=serviceList.begin();vi!=serviceList.end();vi++){
+		wcout<<vi->serviceInstanceName
+			<<L"-"<<vi->comment
+			<<L"-"<<vi->sockaddrBth.btAddr
+			<<L"-"<<vi->sockaddrBth.port
+			<<endl;
+	}
+	DEF_BTDEV_MGR->UpdateServices(deviceAddr, serviceList);
+}
+
 CBTDeviceManager* CBTDeviceManager::m_instance=NULL;
 
 void CDevMgrBTHandlerThread::OnReceive(SOCKET s, BYTEBUFFER buff)
@@ -23,7 +58,7 @@ int CDevMgrBTHandlerThread::Run()
 	m_pSocket->Connect(m_sockaddrBth.btAddr,m_sockaddrBth.port,10);
 
 	//Thread main loop
-	while(m_pSocket->Recveive());
+	while(m_pSocket->Recveive()!=-1);
 
 	return 0;
 }
@@ -82,6 +117,8 @@ void CBTDeviceManager::ListDevices()
 
 int CBTDeviceManager::Run()
 {
+	DEF_BTDEVICE->RegisterHandler(DEF_BTDEV_HANDLER);
+
 	while(true){
 		WaitForSingleObject(m_hMutex,INFINITE);
 		wcout<<L"***Device list:***"<<endl;
@@ -105,6 +142,9 @@ int CBTDeviceManager::Run()
 					wcout<<L" - "<<pDev->m_pSockHandler->GetStatusString() <<endl;
 				}else{
 					wcout<<L" - Not active"<<endl;
+					delete pDev->m_pSockHandler;
+					pDev->m_pSockHandler=NULL;
+					UnregisterDevice(pDev);
 				}
 
 				wcout<<endl;
