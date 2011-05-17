@@ -5,11 +5,11 @@
 #include "BlueToothSocket.h"
 
 CBlueToothSocket::CBlueToothSocket(SOCKET s):
-	m_bStarted(TRUE),
-	m_bConnected(TRUE),
-	m_bCreated(TRUE),
+	m_bStarted(true),
+	m_bConnected(true),
+	m_bCreated(true),
 	m_pHandler(NULL),
-	m_bAuth(FALSE)
+	m_bAuth(false)
 {
 	if(s!=INVALID_SOCKET){
 		m_socket=s;
@@ -21,20 +21,20 @@ CBlueToothSocket::CBlueToothSocket(SOCKET s):
 }
 
 CBlueToothSocket::CBlueToothSocket(void):
-	m_bStarted(FALSE),
-	m_bConnected(FALSE),
-	m_bCreated(FALSE),
+	m_bStarted(false),
+	m_bConnected(false),
+	m_bCreated(false),
 	m_pHandler(NULL),
 	m_iStatus(NOT_CREATED),
 	m_socket(INVALID_SOCKET),
-	m_bAuth(FALSE)
+	m_bAuth(false)
 {
 	WSADATA data;
 	if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
 		WSAGetLastError();
-		m_bStarted = FALSE;
+		m_bStarted = false;
 	} else {
-		m_bStarted = TRUE;
+		m_bStarted = true;
     }
 }
 
@@ -58,40 +58,40 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 	if (s == INVALID_SOCKET) {
 		//throwIOExceptionWinGetLastError(env, "Failed to create socket");
 		Utils::ShowError(TEXT("socket"));
-		return FALSE;
+		return false;
 	}
 
 	// set socket options
 #ifndef LOOPBACK_TEST
 	if (authenticate) {
-		ULONG ul = TRUE;
-		m_bAuth = TRUE;
+		ULONG ul = true;
+		m_bAuth = true;
 
 		if (setsockopt(s, SOL_RFCOMM, SO_BTH_AUTHENTICATE, (char *)&ul, sizeof(ULONG))) {
 			closesocket(s);
 			//throwIOExceptionWinGetLastError(env, "Failed to set authentication option");
 			Utils::ShowError(TEXT("socket"));
-			return FALSE;
+			return false;
 		}
 	}
 
 	if (encrypt) {
 
-		ULONG ul = TRUE;
+		ULONG ul = true;
 
 		if (setsockopt(s, SOL_RFCOMM, SO_BTH_ENCRYPT, (char *)&ul, sizeof(ul))) {
 			closesocket(s);
 			//throwIOExceptionWinGetLastError(env, "Failed to set encryption option");
 			Utils::ShowError(TEXT("socket"));
-			return FALSE;
+			return false;
 		}
 	}
 #endif
 	//debug(("socket[%u] opened", (int)s));
 	m_socket = s;
-	m_bCreated = TRUE;
+	m_bCreated = true;
 	m_iStatus = CREATED;
-	return TRUE;
+	return true;
 }
 
 
@@ -104,7 +104,7 @@ BOOL CBlueToothSocket::Connect(BTH_ADDR address, int channel, int retryUnreachab
 
 	if(m_bAuth){
 		BLUETOOTH_DEVICE_INFO btdi;
-		CBlueTooth::getBluetoothDeviceInfo(address,&btdi,FALSE);
+		CBlueTooth::getBluetoothDeviceInfo(address,&btdi,false);
 		if(m_passkey.size()>0){
 			switch(BluetoothAuthenticateDevice(NULL, NULL, &btdi, &m_passkey[0], m_passkey.size()))
 			{
@@ -175,23 +175,23 @@ connectRety:
 			//throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "Connecting application requested authentication, but authentication failed [10013] .");
 			Utils::ShowError(TEXT("Connect"));
 			m_iStatus = CONNECTION_AUTH_FAILED;
-			return FALSE;
+			return false;
 		} else if (last_error == WSAETIMEDOUT) {
 			//throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout; [%lu] %S", last_error, getWinErrorMessage(last_error));
 			Utils::ShowError(TEXT("Connect"));
 			m_iStatus = CONNECTION_TIMEOUT;
-			return FALSE;
+			return false;
 		} else {
 			//throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to connect; [%lu] %S", last_error, getWinErrorMessage(last_error));
 			Utils::ShowError(TEXT("Connect"));
 			m_iStatus = CONNECTION_FAILED;
-			return FALSE;
+			return false;
 		}
 	}
 
 	m_iStatus = CONNECTED;
 
-	return TRUE;
+	return true;
 }
 
 BOOL CBlueToothSocket::Bind() {
@@ -217,9 +217,9 @@ BOOL CBlueToothSocket::Bind() {
 		closesocket((SOCKET)m_socket);
 		//throwIOExceptionWSAGetLastError(env, "Failed to bind socket");
 		Utils::ShowError(TEXT("Bind"));
-		return FALSE;
+		return false;
 	}
-	return TRUE;
+	return true;
 }
 
 BOOL CBlueToothSocket::Listen() {
@@ -229,9 +229,9 @@ BOOL CBlueToothSocket::Listen() {
 	if (listen((SOCKET)m_socket, SOMAXCONN)) {
 		//throwIOExceptionWSAGetLastError(env, "Failed to listen socket");
 		Utils::ShowError(TEXT("Listen"));
-		return FALSE;
+		return false;
 	}
-	return TRUE;
+	return true;
 }
 
 SOCKET CBlueToothSocket::Accept() {
@@ -296,7 +296,7 @@ int CBlueToothSocket::RecveiveChar() {
 	struct timeval timeout;
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 500 * 1000; //microseconds
-    while (TRUE) {
+    while (true) {
         fd_set readfds;
         fd_set exceptfds;
         FD_ZERO(&readfds);
@@ -341,7 +341,7 @@ size_t CBlueToothSocket::Recveive() {
     struct timeval timeout;
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 500 * 1000; //microseconds
-    while (TRUE) {
+    while (true) {
         fd_set readfds;
         fd_set exceptfds;
         FD_ZERO(&readfds);
@@ -445,9 +445,9 @@ bool CBlueToothSocket::RegisterHandler(CSocketHandler* pHandler)
 {
 	if(pHandler!=NULL){
 		m_pHandler = pHandler;
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 wstring CBlueToothSocket::GetStatusString()

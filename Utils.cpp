@@ -1,8 +1,9 @@
-#include "StdAfx.h"
+//#include "StdAfx.h"
 #include "Utils.h"
 #include <Windows.h>
 #include <string>
 #include <istream>
+#include <iostream>
 #include <sstream>
 #include <iomanip>
 #include "PersistentStorage.h"
@@ -35,7 +36,7 @@ wstring Utils::CurrentTime()
 	return str;
 }
 
-void Utils::ShowError(LPTSTR lpszFunction) 
+void Utils::ShowError(std::wstring lpszFunction) 
 { 
 	// Retrieve the system error message for the last-error code
 
@@ -50,19 +51,18 @@ void Utils::ShowError(LPTSTR lpszFunction)
 		NULL,
 		dw,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR) &lpMsgBuf,
+		(LPWSTR) &lpMsgBuf,
 		0, NULL );
 
 	// Display the error message and exit the process
 
 	lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
-		(lstrlen((LPCTSTR)lpMsgBuf) + lstrlen((LPCTSTR)lpszFunction) + 40) * sizeof(TCHAR)); 
-	StringCchPrintf((LPTSTR)lpDisplayBuf, 
-		LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+		(lstrlen((LPCWSTR)lpMsgBuf) + lpszFunction.length() + 40) * sizeof(wchar_t)); 
+	swprintf((wchar_t *)lpDisplayBuf, 
 		TEXT("%s failed with error %d: %s"), 
-		lpszFunction, dw, lpMsgBuf); 
-	//MessageBox(NULL, (LPCTSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
-	wcout<<(LPCTSTR)lpDisplayBuf<<endl;
+		lpszFunction.c_str(), dw, lpMsgBuf); 
+	//MessageBox(NULL, (std::wstring)lpDisplayBuf, TEXT("Error"), MB_OK); 
+	wcout<<lpDisplayBuf<<endl;
 
 	LocalFree(lpMsgBuf);
 	LocalFree(lpDisplayBuf);
@@ -87,7 +87,7 @@ TEST(UtilsTest,Logging)
 	Utils::LogEvent(L"UTEST_SRCID",L"UTEST_SRCDESC",999999,L"UTEST_EVTDESC");
 
 	CEvent evt = PERSISTENT_STORAGE_PTR->GetLastRecord();
-	if(evt.isNull==FALSE){
+	if(evt.isNull==false){
 		wcout<<evt.timestamp<<"\t";
 		wcout<<evt.source_id<<"\t";
 		wcout<<evt.source_desc<<"\t";
@@ -103,3 +103,25 @@ TEST(UtilsTest,Logging)
 
 
 #endif
+
+wstring widen( const string& str )
+{
+      wostringstream wstm ;
+      wstm.imbue(std::locale("en_US.UTF-8"));
+      const ctype<wchar_t>& ctfacet =
+      use_facet< ctype<wchar_t> >( wstm.getloc() ) ;
+      for( size_t i=0 ; i<str.size() ; ++i )
+      wstm << ctfacet.widen( str[i] ) ;
+      return wstm.str() ;
+}
+       
+string narrow( const wstring& str )
+{
+      ostringstream stm ;
+      stm.imbue(std::locale("en_US"));
+      const ctype<char>& ctfacet =
+      use_facet< ctype<char> >( stm.getloc() ) ;
+      for( size_t i=0 ; i<str.size() ; ++i )
+      stm << ctfacet.narrow( str[i], 0 ) ;
+      return stm.str() ;
+}

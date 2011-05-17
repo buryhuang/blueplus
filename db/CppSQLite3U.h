@@ -53,9 +53,31 @@
 #endif // _MSC_VER > 1000
 // CppSQLite3U.h : header file
 //
-#include "afxwin.h"
+//#include "afxwin.h"
+#include <string>
+#include "Windows.h"
 #include "sqlite3.h"
+using namespace std;
 /////////////////////////////////////////////////////////////////////////////
+
+#ifdef _UNICODE
+#define _T(x)     L ## x
+#define _tcslen   wcslen
+#define _stprintf swprintf
+#define _tstoi    _wtoi
+#define _tcscmp   wcscmp
+
+#else /* _UNICODE */
+
+#define _T(x)     x
+#define _tcslen   strlen
+#define _stprintf sprintf
+#define _tstoi    atoi
+#define _tcscmp   strcmp
+
+#endif /* _UNICODE */
+
+
 
 #define SQL_MAXSIZE    2048
 
@@ -63,7 +85,7 @@
 static const bool DONT_DELETE_MSG=false;
 
 
-CString DoubleQuotes(CString in);
+std::wstring DoubleQuotes(std::wstring in);
 
 class CppSQLite3Query;
 class CppSQLite3Statement;
@@ -113,7 +135,7 @@ public:
     CppSQLite3Query execQuery(LPCTSTR szSQL);
 
     int execScalar(LPCTSTR szSQL);
-	CString execScalarStr(LPCTSTR szSQL);
+	std::wstring execScalarStr(LPCTSTR szSQL);
 
     CppSQLite3Statement compileStatement(LPCTSTR szSQL);
 

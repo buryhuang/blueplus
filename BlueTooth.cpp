@@ -14,19 +14,19 @@ vector<int> CBlueTooth::BTServiceUuid16List;
 CBlueTooth* CBlueTooth::m_instance=NULL;
 
 CBlueTooth::CBlueTooth(void):
-	m_bBluetoothStackPresent(FALSE),
-	m_bStarted(FALSE),
+	m_bBluetoothStackPresent(false),
+	m_bStarted(false),
 	m_hDeviceLookup(NULL),
-	m_bInitialBtIsDiscoverable(FALSE),
-	m_bRestoreBtMode(FALSE),
+	m_bInitialBtIsDiscoverable(false),
+	m_bRestoreBtMode(false),
 	m_pHandler(NULL)
 {
 	WSADATA data;
 	if (WSAStartup(MAKEWORD(2, 2), &data) != 0) {
 		WSAGetLastError();
-		m_bStarted = FALSE;
+		m_bStarted = false;
 	} else {
-		m_bStarted = TRUE;
+		m_bStarted = true;
     }
 
 	if(CBlueTooth::BTServiceUuid16List.size()==0){
@@ -79,8 +79,8 @@ CBlueTooth::~CBlueTooth(void)
 
 bool CBlueTooth::GetLocalAddress(SOCKADDR_BTH& btAddr)
 {
-	if(InitializationStatus()==FALSE){
-		return FALSE;
+	if(InitializationStatus()==false){
+		return false;
 	}
 	SOCKET s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 	//Utils::ShowError(TEXT("isBluetoothStackPresent"));
@@ -88,7 +88,7 @@ bool CBlueTooth::GetLocalAddress(SOCKADDR_BTH& btAddr)
 		int last_error = WSAGetLastError();
 		//debug(("socket error [%d] %S", last_error, getWinErrorMessage(last_error)));
 		Utils::ShowError(TEXT("isBluetoothStackPresent"));
-		return FALSE;
+		return false;
 	}
 
 	memset(&btAddr, 0, sizeof(SOCKADDR_BTH));
@@ -101,7 +101,7 @@ bool CBlueTooth::GetLocalAddress(SOCKADDR_BTH& btAddr)
 		//debug(("bind error [%d] %S", last_error, getWinErrorMessage(last_error)));
 		Utils::ShowError(TEXT("isBluetoothStackPresent"));
 		closesocket(s);
-		return FALSE;
+		return false;
 	}
 
 	int size = sizeof(SOCKADDR_BTH);
@@ -109,10 +109,10 @@ bool CBlueTooth::GetLocalAddress(SOCKADDR_BTH& btAddr)
 		int last_error = WSAGetLastError();
 //		debug(("getsockname error [%d] %S", last_error, getWinErrorMessage(last_error)));
 		closesocket(s);
-		return FALSE;
+		return false;
 	}
 	closesocket(s);
-	return TRUE;
+	return true;
 }
 
 bool CBlueTooth::IsBluetoothStackPresent() {
@@ -123,7 +123,7 @@ bool CBlueTooth::IsBluetoothStackPresent() {
 		int last_error = WSAGetLastError();
 		//debug(("socket error [%d] %S", last_error, getWinErrorMessage(last_error)));
 		Utils::ShowError(TEXT("isBluetoothStackPresent"));
-		return FALSE;
+		return false;
 	}
 	SOCKADDR_BTH btAddr;
 	memset(&btAddr, 0, sizeof(SOCKADDR_BTH));
@@ -138,7 +138,7 @@ bool CBlueTooth::IsBluetoothStackPresent() {
 		//debug(("bind error [%d] %S", last_error, getWinErrorMessage(last_error)));
 		Utils::ShowError(TEXT("isBluetoothStackPresent"));
 		closesocket(s);
-		return FALSE;
+		return false;
 	}
 
 	int size = sizeof(SOCKADDR_BTH);
@@ -146,11 +146,11 @@ bool CBlueTooth::IsBluetoothStackPresent() {
 		int last_error = WSAGetLastError();
 //		debug(("getsockname error [%d] %S", last_error, getWinErrorMessage(last_error)));
 		closesocket(s);
-		return FALSE;
+		return false;
 	}
 
 	closesocket(s);
-	//return TRUE;
+	//return true;
 	m_bBluetoothStackPresent = (btAddr.btAddr != 0);
 	return m_bBluetoothStackPresent;
 }
@@ -165,11 +165,11 @@ bool CBlueTooth::InitializationStatus() {
 
 	if (m_bStarted) {
 		if (BluetoothIsDiscoverable(NULL)) {
-			m_bInitialBtIsDiscoverable = TRUE;
+			m_bInitialBtIsDiscoverable = true;
 		}
-		return TRUE;
+		return true;
     }
-    return FALSE;
+    return false;
 }
 
 bool CBlueTooth::GetBluetoothGetRadioInfo(BTH_ADDR address, BLUETOOTH_RADIO_INFO* info) {
@@ -184,13 +184,13 @@ bool CBlueTooth::GetBluetoothGetRadioInfo(BTH_ADDR address, BLUETOOTH_RADIO_INFO
 				if (radioInfo.address.ullLong == address) {
 					BluetoothFindRadioClose(hFind);
 					memcpy(info, &radioInfo, sizeof(BLUETOOTH_RADIO_INFO));
-					return TRUE;
+					return true;
 				}
 			}
 		} while( BluetoothFindNextRadio( hFind, &hRadio ) );
 		BluetoothFindRadioClose( hFind );
 	}
-	return FALSE;
+	return false;
 }
 
 bool CBlueTooth::getBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO* pbtdi, BOOL issueInquiry) {
@@ -213,7 +213,7 @@ bool CBlueTooth::getBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO*
 		do {
 			if (pbtdi->Address.ullLong == address) {
 			    BluetoothFindDeviceClose(hFind);
-				return TRUE;
+				return true;
             }
 			printf("found device %i", pbtdi->Address.ullLong);
 			memset(pbtdi, 0, sizeof(BLUETOOTH_DEVICE_INFO));
@@ -221,7 +221,7 @@ bool CBlueTooth::getBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO*
 		} while (BluetoothFindNextDevice(hFind, pbtdi));
         BluetoothFindDeviceClose(hFind);
 	}
-	return FALSE;
+	return false;
 }
 
 string CBlueTooth::GetRadioName(long address) {
@@ -345,15 +345,15 @@ int CBlueTooth::RunDeviceInquiry(int duration)
 		// get device name
 		WCHAR name[256];
 		bool bHaveName = pwsaResults->lpszServiceInstanceName && *(pwsaResults->lpszServiceInstanceName);
-		StringCchPrintf(name, sizeof(name),L"%s",bHaveName ? pwsaResults->lpszServiceInstanceName : L"");
+		_stprintf(name, sizeof(name),L"%s",bHaveName ? pwsaResults->lpszServiceInstanceName : L"");
 //        debug(("ServiceInstanceName [%S]", name));
 		wstring deviceName((WCHAR *)name, (int)wcslen(name));
 
-        bool paired = FALSE;
+        bool paired = false;
 
 		int deviceClass = p_inqRes->classOfDevice;
 		if (p_inqRes->flags & BDIF_PAIRED) {
-		    paired = TRUE;
+		    paired = true;
 		}
 		BTH_ADDR deviceAddr;
 
@@ -420,13 +420,13 @@ BOOL __stdcall callback(ULONG uAttribId, LPBYTE pValueStream, ULONG cbStreamSize
 	{
 		// Just a verification
 		//printf("BluetoothSdpGetElementData() failed with error code %ld\n", WSAGetLastError());
-		return FALSE;
+		return false;
 	}
 	else
 	{
 		// Just a verification
 		//printf("BluetoothSdpGetElementData() is OK!\n");
-		return TRUE;
+		return true;
 	}
 }
 
@@ -461,7 +461,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 		if (s == INVALID_SOCKET)
 		{
 			printf("Failed to get bluetooth socket with error code %ld\n", WSAGetLastError());
-			return FALSE;
+			return false;
 		}
 		else{
 			//printf("socket() is OK!\n");
@@ -473,7 +473,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 		if (getsockopt(s, SOL_SOCKET, SO_PROTOCOL_INFO, (char*)&protocolInfo, &protocolInfoSize) != 0)
 		{
 			printf("getsockopt(SO_PROTOCOL_INFO) failed with error code %ld\n", WSAGetLastError());
-			return FALSE;
+			return false;
 		}
 		else{
 			//printf("getsockopt(SO_PROTOCOL_INFO) is OK!\n");
@@ -642,7 +642,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 	if(m_pHandler!=NULL){
 		m_pHandler->OnServiceDiscovered(address, serviceList);
 	}
-	return TRUE;
+	return true;
 }
 
 #if 0
@@ -860,9 +860,9 @@ bool CBlueTooth::RegisterHandler(CBTHandler* pHandler)
 {
 	if(pHandler!=NULL){
 		m_pHandler = pHandler;
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 #ifdef UNITTEST

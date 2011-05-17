@@ -21,9 +21,9 @@ CBTDeviceMgrBTHandler::~CBTDeviceMgrBTHandler(void)
 void CBTDeviceMgrBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)
 {
 	wcout<<hex<<deviceAddr<<" - "<<deviceName<<endl;
-	if(DEF_BTDEV_MGR->RegisterDevice(deviceAddr, deviceClass, deviceName, paired)!=TRUE){
+	if(DEF_BTDEV_MGR->RegisterDevice(deviceAddr, deviceClass, deviceName, paired)!=true){
 		wcout<<L"Registering failed"<<endl;
-		if(DEF_BTDEV_MGR->UpdateDevice(deviceAddr, deviceClass, deviceName, paired)!=TRUE){
+		if(DEF_BTDEV_MGR->UpdateDevice(deviceAddr, deviceClass, deviceName, paired)!=true){
 			wcout<<L"Updating failed"<<endl;
 		}
 	}
@@ -53,7 +53,7 @@ int CDevMgrBTHandlerThread::Run()
 {
 	m_pSocket = new CBlueToothSocket();
 	m_pSocket->RegisterHandler(this);
-	m_pSocket->Create(TRUE,FALSE);
+	m_pSocket->Create(true,false);
 	m_pSocket->SetPasskey(L"0000");
 	m_pSocket->Connect(m_sockaddrBth.btAddr,m_sockaddrBth.port,10);
 
@@ -75,11 +75,11 @@ CBTDevice::CBTDevice(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, b
 CBTDeviceManager::CBTDeviceManager(void):m_hMutex(NULL)
 {
 	SECURITY_ATTRIBUTES attr;
-	attr.bInheritHandle=TRUE;
+	attr.bInheritHandle=true;
 	attr.lpSecurityDescriptor=NULL;
 	attr.nLength=sizeof(SECURITY_ATTRIBUTES);
 
-	m_hMutex = CreateMutex(NULL,FALSE,NULL);
+	m_hMutex = CreateMutex(NULL,false,NULL);
 }
 
 CBTDeviceManager::~CBTDeviceManager(void)
@@ -161,7 +161,7 @@ int CBTDeviceManager::Run()
 bool CBTDeviceManager::UpdateServices(BTH_ADDR deviceAddr, vector<ServiceRecord> serviceList)
 {
 	if(m_mapBTDevice.find(deviceAddr)==m_mapBTDevice.end()){
-		return FALSE;
+		return false;
 	}
 
 	WaitForSingleObject(m_hMutex,INFINITE);
@@ -171,23 +171,23 @@ bool CBTDeviceManager::UpdateServices(BTH_ADDR deviceAddr, vector<ServiceRecord>
 
 	ReleaseMutex(m_hMutex);
 	
-	return TRUE;
+	return true;
 }
 
 
 bool CBTDeviceManager::RegisterDevice(CBTDevice* pDevice)
 {
 	if(pDevice == NULL){
-		return FALSE;
+		return false;
 	}
 	WaitForSingleObject(m_hMutex,INFINITE);
 	if(m_mapBTDevice.find(pDevice->m_addrBth)==m_mapBTDevice.end()){
 		m_mapBTDevice[pDevice->m_addrBth]=pDevice;
-		return TRUE;
+		return true;
 	}
 	ReleaseMutex(m_hMutex);
 	delete pDevice;
-	return FALSE;
+	return false;
 }
 
 bool CBTDeviceManager::RegisterDevice(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)
@@ -196,13 +196,13 @@ bool CBTDeviceManager::RegisterDevice(BTH_ADDR deviceAddr, int deviceClass, wstr
 		CBTDevice* pDevice = new CBTDevice(deviceAddr, deviceClass, deviceName, paired);
 		return RegisterDevice(pDevice);
 	}
-	return FALSE;
+	return false;
 }
 
 bool CBTDeviceManager::UpdateDevice(CBTDevice* pDevice)
 {
 	if(m_mapBTDevice.find(pDevice->m_addrBth)==m_mapBTDevice.end()){
-		return FALSE;
+		return false;
 	}
 	
 	return UpdateDevice(
@@ -216,7 +216,7 @@ bool CBTDeviceManager::UpdateDevice(CBTDevice* pDevice)
 bool CBTDeviceManager::UpdateDevice(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)
 {
 	if(m_mapBTDevice.find(deviceAddr)==m_mapBTDevice.end()){
-		return FALSE;
+		return false;
 	}
 
 	WaitForSingleObject(m_hMutex,INFINITE);
@@ -229,17 +229,17 @@ bool CBTDeviceManager::UpdateDevice(BTH_ADDR deviceAddr, int deviceClass, wstrin
 
 	ReleaseMutex(m_hMutex);
 	
-	return TRUE;
+	return true;
 }
 
 bool CBTDeviceManager::UnregisterDevice(CBTDevice* pDevice)
 {
 	if(pDevice == NULL){
-		return FALSE;
+		return false;
 	}
 	BTH_ADDR deviceAddr = pDevice->m_addrBth;
 	if(m_mapBTDevice.find(deviceAddr)==m_mapBTDevice.end()){
-		return FALSE;
+		return false;
 	}
 	return UnregisterDevice(pDevice->m_addrBth);
 }
@@ -247,14 +247,14 @@ bool CBTDeviceManager::UnregisterDevice(BTH_ADDR deviceAddr)
 {
 	WaitForSingleObject(m_hMutex,INFINITE);
 	if(m_mapBTDevice.find(deviceAddr)==m_mapBTDevice.end()){
-		return FALSE;
+		return false;
 	}
 	delete m_mapBTDevice[deviceAddr];
 	m_mapBTDevice.erase(deviceAddr);
 
 	ReleaseMutex(m_hMutex);
 
-	return TRUE;
+	return true;
 }
 
 BT_DEV_MAP CBTDeviceManager::GetDeviceMap()
@@ -278,9 +278,9 @@ TEST(BTDeviceManagerTest,RegisterDevice)
 {
 	ASSERT_FALSE(DEF_BTDEV_MGR->RegisterDevice((CBTDevice*)NULL));
 
-	ASSERT_TRUE(DEF_BTDEV_MGR->RegisterDevice(0x0001,0,L"DummyBT1",FALSE));
-	ASSERT_FALSE(DEF_BTDEV_MGR->RegisterDevice(0x0001,0,L"DummyBT1",FALSE));
-	ASSERT_TRUE(DEF_BTDEV_MGR->UpdateDevice(0x0001,0,L"DummyBT1_Updated",FALSE));
+	ASSERT_TRUE(DEF_BTDEV_MGR->RegisterDevice(0x0001,0,L"DummyBT1",false));
+	ASSERT_FALSE(DEF_BTDEV_MGR->RegisterDevice(0x0001,0,L"DummyBT1",false));
+	ASSERT_TRUE(DEF_BTDEV_MGR->UpdateDevice(0x0001,0,L"DummyBT1_Updated",false));
 	ASSERT_TRUE(DEF_BTDEV_MGR->GetDeviceMap().size() == 1);
 }
 
@@ -299,7 +299,7 @@ DWORD WINAPI RegisterDeviceThreadFunc( LPVOID lpParam )
 {
 	Sleep(rand()%UNITTEST_DEVMGR_THREAD_DELAY_MS);
 	//wcout<<"Registering "<<lpParam<<endl;
-	EXPECT_EQ(DEF_BTDEV_MGR->RegisterDevice((BTH_ADDR)lpParam,0,L"DummyMTBT",FALSE),true);
+	EXPECT_EQ(DEF_BTDEV_MGR->RegisterDevice((BTH_ADDR)lpParam,0,L"DummyMTBT",false),true);
 	return 0;
 }
 TEST(BTDeviceManagerTest,MTRegisterDevice)
@@ -319,7 +319,7 @@ TEST(BTDeviceManagerTest,MTRegisterDevice)
 	for(int cnt=0;cnt<UNITTEST_DEVMGR_MAX_THREADS;cnt++){
 		ResumeThread(hThreads[cnt]);
 	}
-	//WaitForMultipleObjects(UNITTEST_DEVMGR_MAX_THREADS, hThreads, TRUE, INFINITE);
+	//WaitForMultipleObjects(UNITTEST_DEVMGR_MAX_THREADS, hThreads, true, INFINITE);
 	for(int cnt=0;cnt<UNITTEST_DEVMGR_MAX_THREADS;cnt++){
 		WaitForSingleObject(hThreads[cnt],INFINITE);
 	}
@@ -354,7 +354,7 @@ TEST(BTDeviceManagerTest,MTUnregisterDevice)
 	for(int cnt=0;cnt<UNITTEST_DEVMGR_MAX_THREADS*UNITTEST_DEVMGR_MAX_CONFLICTS;cnt++){
 		ResumeThread(hThreads[cnt]);
 	}
-	//WaitForMultipleObjects(UNITTEST_DEVMGR_MAX_THREADS, hThreads, TRUE, INFINITE);
+	//WaitForMultipleObjects(UNITTEST_DEVMGR_MAX_THREADS, hThreads, true, INFINITE);
 	for(int cnt=0;cnt<UNITTEST_DEVMGR_MAX_THREADS*UNITTEST_DEVMGR_MAX_CONFLICTS;cnt++){
 		WaitForSingleObject(hThreads[cnt],INFINITE);
 	}
