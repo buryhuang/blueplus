@@ -17,6 +17,23 @@
 #include <vector>
 using namespace std;
 
+#ifdef _UNICODE
+#define _T(x)     L ## x
+#define _tcslen   wcslen
+#define _stprintf swprintf
+#define _tstoi    _wtoi
+#define _tcscmp   wcscmp
+
+#else /* _UNICODE */
+
+#define _T(x)     x
+#define _tcslen   strlen
+#define _stprintf sprintf
+#define _tstoi    atoi
+#define _tcscmp   strcmp
+
+#endif /* _UNICODE */
+
 typedef vector<SdpQueryUuid> UUIDSET;
 
 typedef string BYTEBUFFER;

@@ -63,11 +63,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Bthprops.lib"
+				AdditionalDependencies="Bthprops.lib ws2_32.lib user32.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				EntryPointSymbol=""
 				ImportLibrary=""
@@ -143,10 +143,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Bthprops.lib"
+				AdditionalDependencies="Bthprops.lib ws2_32.lib user32.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -206,7 +206,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\;.\framework;.\db;.\test;.\test\gtest-1.5.0\include"
+				AdditionalIncludeDirectories="..\;.\framework;.\db;.\test;.\test\gtest-1.6.0\include"
 				PreprocessorDefinitions="WINVER=0x0501;SQLITE_OS_WIN;UNITTEST"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -227,12 +227,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Bthprops.lib"
+				AdditionalDependencies="Bthprops.lib ws2_32.lib user32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories=""
 				DelayLoadDLLs=""
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				EntryPointSymbol=""
 				ImportLibrary=""
@@ -289,7 +289,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\;.\framework;.\db;.\test;.\test\gtest-1.5.0\include"
+				AdditionalIncludeDirectories="..\;.\framework;.\db;.\test;.\test\gtest-1.6.0\include"
 				PreprocessorDefinitions="WINVER=0x0501;UNITTEST;LOOPBACK_TEST"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -308,10 +308,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Bthprops.lib"
+				AdditionalDependencies="Bthprops.lib ws2_32.lib user32.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -382,6 +382,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\config\ConfigEntry.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\config\ConfigSet.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\config\ConfigSetOutputPrefix.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\config\ConfigSetOutputTabulated.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\db\CppSQLite3U.cpp"
 				>
 			</File>
@@ -404,42 +420,6 @@
 			<File
 				RelativePath=".\db\sqlite3.c"
 				>
-			</File>
-			<File
-				RelativePath=".\stdafx.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unittest|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Unittest_Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\Utils.cpp"
@@ -488,6 +468,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\config\ConfigEntry.h"
+				>
+			</File>
+			<File
+				RelativePath=".\config\ConfigSet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\config\ConfigSetOutputPrefix.h"
+				>
+			</File>
+			<File
+				RelativePath=".\config\ConfigSetOutputTabulated.h"
+				>
+			</File>
+			<File
 				RelativePath=".\db\CppSQLite3U.h"
 				>
 			</File>
@@ -521,10 +517,6 @@
 			</File>
 			<File
 				RelativePath=".\db\sqlite3.h"
-				>
-			</File>
-			<File
-				RelativePath=".\stdafx.h"
 				>
 			</File>
 			<File

@@ -1,6 +1,6 @@
 // bbt.cpp : 定义控制台应用程序的入口点。
 //
-#include "stdafx.h"
+//#include "stdafx.h"
 #include "InstanceMonitor.h"
 
 #ifdef UNITTEST
@@ -13,6 +13,13 @@ using namespace std;
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+#ifdef _UNICODE
+#define _tmain wmain
+#else
+#define _tmain main
+#endif
+
 
 
 // 唯一的应用程序对象

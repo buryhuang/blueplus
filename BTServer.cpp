@@ -65,17 +65,17 @@ CBTServer::~CBTServer(void)
 
 int CBTServer::Run()
 {
-	m_socket.Create(FALSE,FALSE);
+	m_socket.Create(false,false);
 
 	m_socket.Bind();
 
 	while(true){
 
-		if(m_socket.RegisterHandler(new CBTServerHandler(L"Default Connection Handler"))!=TRUE){
+		if(m_socket.RegisterHandler(new CBTServerHandler(L"Default Connection Handler"))!=true){
 			Utils::ShowError(L"CBTServer::Run");
 			return -1;
 		}
-		if(m_socket.Listen()!=TRUE){
+		if(m_socket.Listen()!=true){
 			Utils::ShowError(L"CBTServer::Run");
 			return -1;
 		}
@@ -110,7 +110,7 @@ TEST(CBTServerTest,ConnectToLocalServer)
 	CBlueTooth cbt;
 	SOCKADDR_BTH btAddr;
 	cbt.GetLocalAddress(btAddr);
-	cbts.Create(FALSE,FALSE);
+	cbts.Create(false,false);
 	cbts.Connect(btAddr.btAddr,1,5);
 
 	ASSERT_TRUE(WSAGetLastError()==0);

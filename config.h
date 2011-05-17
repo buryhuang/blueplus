@@ -1,5 +1,7 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN //avoid 
+
 #define BT_DETECT_DURATION_SECONDS 20
 #define BT_DETECT_INTERVAL_MS 3000
 

@@ -3,26 +3,51 @@
  */
 
 #include "ManagedThread.h"
-#include "afxwin.h"
+#include "windows.h"
+//#include "afxwin.h"
 
-class CPrivateManagedThread: public CWinThread
+class CPrivateManagedThread
 {
 public:
 	CPrivateManagedThread(CRunnable* ptr):m_ptrRunnable(ptr)
 	{
 	}
-	BOOL InitInstance()
+	
+	bool InitInstance()
 	{
-		m_bAutoDelete=FALSE;
-		return TRUE;
+		m_bAutoDelete=false;
+		return true;
 	}
+
+	static UINT ThreadFunc(LPVOID param)
+   {
+      CPrivateManagedThread* This = (CPrivateManagedThread*)param;
+      This->Run(); // call a member function
+	  return 0;
+   }
+
+	void CreateThread()
+	{
+		m_hThread = ::CreateThread (
+            0, // Security attributes
+            0, // Stack size
+			(LPTHREAD_START_ROUTINE)(ThreadFunc),
+            (LPVOID)this,
+            CREATE_SUSPENDED,
+            &m_tid);
+	}
+
 	virtual int Run()
 	{
 		return m_ptrRunnable->Run();
 	}
 
+	HANDLE     m_hThread;
+
 private:
 	CRunnable* m_ptrRunnable;
+	DWORD      m_tid;
+	bool       m_bAutoDelete;
 };
 
 
@@ -43,9 +68,9 @@ bool CManagedThread::IsAlive()
 {
 	if(WaitForSingleObject(m_ptrThread->m_hThread, 0)!= WAIT_TIMEOUT)
 	{
-		return FALSE;
+		return false;
 	}
-	return TRUE;
+	return true;
 }
 int CManagedThread::Start()
 {

@@ -44,13 +44,16 @@
 // 
 // 
 ////////////////////////////////////////////////////////////////////////////////
-#include "afxwin.h"
+//#include "afxwin.h"
+#include "Windows.h"
 #include "CppSQLite3U.h"
 
+#if 0
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
+#endif
 #endif
 /////////////////////////////////////////////////////////////////////////////
 // CppSQLite3Exception
@@ -293,14 +296,14 @@ int CppSQLite3DB::execScalar(LPCTSTR szSQL)
 }
 
 // Added By Begemot, exact as execScalar but return CString  08/06/06 16:30:37
-CString CppSQLite3DB::execScalarStr(LPCTSTR szSQL)
+std::wstring CppSQLite3DB::execScalarStr(LPCTSTR szSQL)
 {
 	CppSQLite3Query q = execQuery(szSQL);
 
 	if (q.eof() || q.numFields() < 1)
 		throw CppSQLite3Exception(CPPSQLITE_ERROR, _T("Invalid scalar query"),	DONT_DELETE_MSG);
 	
-	return (CString)q.getStringField(0);
+	return (std::wstring)q.getStringField(0);
 }
 
 sqlite_int64 CppSQLite3DB::lastRowId()
@@ -788,8 +791,15 @@ void CppSQLite3Query::checkVM()
 ////////////////////////////////////////////////////////////////////////////////
 //**************************
 //*************-  Added By Begemot - 28/02/06 20:25 - ****
-CString DoubleQuotes(CString in)
+std::wstring DoubleQuotes(std::wstring in)
 {
-	in.Replace(_T("\'"),_T("\'\'"));
+	std::wstring searchString( _T("\'"));
+	std::wstring replaceString( _T("\'\'") );
+	string::size_type pos = 0;
+	//in.Replace(_T("\'"),_T("\'\'"));
+	while ( (pos = in.find(searchString, pos)) != string::npos ) {
+		in.replace( pos, searchString.size(), replaceString );
+		pos++;
+    }
 	return in;
 }

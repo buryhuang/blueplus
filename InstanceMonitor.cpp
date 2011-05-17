@@ -18,11 +18,13 @@ using namespace std;
 
 CInstanceMonitor::CInstanceMonitor(void)
 {
+#if 0
 	if (!AfxWinInit(::GetModuleHandle(NULL), NULL, ::GetCommandLine(), 0))
 	{
 		// TODO: 更改错误代码以符合您的需要
 		_tprintf(_T("错误: MFC 初始化失败\n"));
 	}
+#endif
 }
 
 CInstanceMonitor::~CInstanceMonitor(void)
