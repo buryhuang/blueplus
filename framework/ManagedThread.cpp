@@ -33,7 +33,7 @@ public:
             0, // Stack size
 			(LPTHREAD_START_ROUTINE)(ThreadFunc),
             (LPVOID)this,
-            CREATE_SUSPENDED,
+            0/*CREATE_SUSPENDED*/,
             &m_tid);
 	}
 
