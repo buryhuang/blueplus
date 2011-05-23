@@ -143,11 +143,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Bthprops.lib ws2_32.lib user32.lib"
+				AdditionalDependencies="Bthprops.lib ws2_32.lib user32.lib gdi32.lib shell32.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="false"
-				SubSystem="1"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				EntryPointSymbol=""
