@@ -34,7 +34,8 @@ using namespace std;
 //CWinApp theApp;
 CInstanceMonitor theApp;
 
-int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
+//int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
+UINT MainThread(LPVOID param)
 {
 #ifdef UNITTEST
   std::cout << "Running main() from gtest_main.cc\n";
@@ -57,6 +58,9 @@ static TCHAR szTitle[] = _T("Win32 Guided Tour Application");
 
 HINSTANCE hInst;
 NOTIFYICONDATA nid;
+HANDLE     hThread;
+DWORD      threadId;
+
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -90,8 +94,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case WM_RBUTTONUP:
 			if(IDOK == MessageBox(NULL, L"Are you sure to quit Health Monitor?", L"Quit?", MB_OKCANCEL)) {
+				ShowWindow(hWnd,FALSE);
+				TerminateThread(hThread,0);
 				Shell_NotifyIcon(NIM_DELETE, &nid);
 				PostQuitMessage(0);
+
 				return 0;
 			};
 			break;
@@ -184,6 +191,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpszCmd, int nCmd
 	nid.uFlags = NIF_MESSAGE|NIF_ICON|NIF_TIP;
 	 
 	Shell_NotifyIcon(NIM_ADD, &nid);
+
+	hThread = ::CreateThread (
+    0, // Security attributes
+    0, // Stack size
+	(LPTHREAD_START_ROUTINE)(MainThread),
+    (LPVOID)0,
+    0/*CREATE_SUSPENDED*/,
+    &threadId);
 
 	MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
