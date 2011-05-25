@@ -80,6 +80,7 @@ typedef string BYTEBUFFER;
 
 struct ServiceRecord
 {
+	unsigned int uuid16;
 	wstring serviceInstanceName;
 	wstring comment;
 	SOCKADDR_BTH sockaddrBth;

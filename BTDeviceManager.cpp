@@ -20,7 +20,7 @@ CBTDeviceMgrBTHandler::~CBTDeviceMgrBTHandler(void)
 
 void CBTDeviceMgrBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)
 {
-	wcout<<hex<<deviceAddr<<" - "<<deviceName<<endl;
+	wcout<<"Device found: "<<hex<<deviceAddr<<" - "<<deviceName<<endl;
 	if(DEF_BTDEV_MGR->RegisterDevice(deviceAddr, deviceClass, deviceName, paired)!=true){
 		wcout<<L"Registering failed"<<endl;
 		if(DEF_BTDEV_MGR->UpdateDevice(deviceAddr, deviceClass, deviceName, paired)!=true){
@@ -28,7 +28,11 @@ void CBTDeviceMgrBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceCl
 		}
 	}
 
-	DEF_BTDEVICE->RunSearchServices(deviceAddr);
+	wcout<<"Searching service for "<<deviceName<<endl;
+	if(DEF_BTDEVICE->RunSearchServices(deviceAddr)==false) {
+		wcout <<"Service search failed, removing device."<<endl;
+		DEF_BTDEV_MGR->UnregisterDevice(deviceAddr);
+	}
 }
 
 void CBTDeviceMgrBTHandler::OnServiceDiscovered(BTH_ADDR deviceAddr, vector<ServiceRecord> serviceList)
@@ -47,7 +51,10 @@ CBTDeviceManager* CBTDeviceManager::m_instance=NULL;
 
 void CDevMgrBTHandlerThread::OnReceive(SOCKET s, BYTEBUFFER buff)
 {
+	//wostringstream woss;
 	cout<<"Received: "<<buff<<endl;
+	//woss<<"Msg Received: "<<widen(buff);
+	//LOGSVREVENT(0,widen(buff));
 };
 int CDevMgrBTHandlerThread::Run()
 {
