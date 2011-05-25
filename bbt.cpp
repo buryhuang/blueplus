@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tchar.h>
+#include <iostream>
+#include <fstream>
+#include <locale>
+#include <tchar.h>
 
 #ifdef UNITTEST
 #include "gtest/gtest.h"
@@ -34,8 +38,9 @@ using namespace std;
 //CWinApp theApp;
 CInstanceMonitor theApp;
 
-//int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
-UINT MainThread(LPVOID param)
+UINT MainThread(LPVOID param){return 0;}
+
+int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 #ifdef UNITTEST
   std::cout << "Running main() from gtest_main.cc\n";
@@ -95,7 +100,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case WM_RBUTTONUP:
 			if(IDOK == MessageBox(NULL, L"Are you sure to quit Health Monitor?", L"Quit?", MB_OKCANCEL)) {
 				ShowWindow(hWnd,FALSE);
-				TerminateThread(hThread,0);
 				Shell_NotifyIcon(NIM_DELETE, &nid);
 				PostQuitMessage(0);
 
@@ -116,6 +120,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpszCmd, int nCmdShow)
 {
+	locale loc("chs");
+
+	wofstream logFile( "out.txt");
+	wstreambuf *outbuf = wcout.rdbuf(logFile.rdbuf());
+	wstreambuf *errbuf = wcerr.rdbuf(logFile.rdbuf()); 
+
     WNDCLASSEX wcex;
 
     wcex.cbSize = sizeof(WNDCLASSEX);
@@ -207,5 +217,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpszCmd, int nCmd
         DispatchMessage(&msg);
     }
 
+	TerminateThread(hThread,0);
+
+	wcout.rdbuf(outbuf);
+	wcerr.rdbuf(errbuf); 
     return (int) msg.wParam;
 }

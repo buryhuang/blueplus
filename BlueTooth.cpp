@@ -30,11 +30,14 @@ CBlueTooth::CBlueTooth(void):
     }
 
 	if(CBlueTooth::BTServiceUuid16List.size()==0){
+#if 0
 		CBlueTooth::BTServiceUuid16List.push_back(SyncMLClient_UUID16                           );  
 		CBlueTooth::BTServiceUuid16List.push_back(ServiceDiscoveryServerServiceClassID_UUID16   );
 		CBlueTooth::BTServiceUuid16List.push_back(BrowseGroupDescriptorServiceClassID_UUID16    );
 		CBlueTooth::BTServiceUuid16List.push_back(PublicBrowseGroupServiceClassID_UUID16        );
+#endif
 		CBlueTooth::BTServiceUuid16List.push_back(SerialPortServiceClassID_UUID16               );
+#if 0
 		CBlueTooth::BTServiceUuid16List.push_back(LANAccessUsingPPPServiceClassID_UUID16        );
 		CBlueTooth::BTServiceUuid16List.push_back(DialupNetworkingServiceClassID_UUID16         );
 		CBlueTooth::BTServiceUuid16List.push_back(IrMCSyncServiceClassID_UUID16                 );
@@ -61,7 +64,8 @@ CBlueTooth::CBlueTooth(void):
 		CBlueTooth::BTServiceUuid16List.push_back(GenericNetworkingServiceClassID_UUID16        );
 		CBlueTooth::BTServiceUuid16List.push_back(GenericFileTransferServiceClassID_UUID16      );
 		CBlueTooth::BTServiceUuid16List.push_back(GenericAudioServiceClassID_UUID16             );
-		CBlueTooth::BTServiceUuid16List.push_back(GenericTelephonyServiceClassID_UUID16         );		
+		CBlueTooth::BTServiceUuid16List.push_back(GenericTelephonyServiceClassID_UUID16         );
+#endif
 		reverse(CBlueTooth::BTServiceUuid16List.begin(),CBlueTooth::BTServiceUuid16List.end());
 	}
 }
@@ -583,7 +587,10 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 									sr.comment=pResults->lpszComment;
 									sr.sockaddrBth = *((SOCKADDR_BTH *)pResults->lpcsaBuffer->RemoteAddr.lpSockaddr);
 
-									serviceList.push_back(sr);
+									if(sr.serviceInstanceName.find(L"Serial")!=wstring::npos){
+										//TODO hard code for now
+										serviceList.push_back(sr);
+									}
 
 									// Extract the sdp info
 									if (pResults->lpBlob)
@@ -613,8 +620,10 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 								printf("WSALookupServiceEnd(hLookup2) failed with error code %ld\n", WSAGetLastError());
 							}
 						}
-						else
+						else {
 							printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
+							return false;
+						}
 					}
 				}
 			}
@@ -629,6 +638,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 		else
 		{
 			printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
+			return false;
 		}// end WSALookupServiceBegin()
 
 		// Cleanup the winsock library startup
