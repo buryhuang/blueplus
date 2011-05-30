@@ -41,7 +41,7 @@ public:
 		:CManagedThread(name),m_sockaddrBth(sockaddr){}
 	virtual void OnAccept(SOCKET s){}
 	virtual void OnReceive(SOCKET s, BYTEBUFFER buff);
-	virtual void OnConnect(){};
+	virtual void OnConnect();
 	virtual void OnClose(){};
 	virtual int Run();
 	wstring GetStatusString(){return m_pSocket->GetStatusString();}
