@@ -220,7 +220,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpszCmd, int nCmd
 
 		return 1;
 	}
-	ShowWindow(hWnd,SW_HIDE);
+	ShowWindow(hWnd,nCmdShow);
 
 	// The parameters to ShowWindow explained:
 	// hWnd: the value returned from CreateWindow
