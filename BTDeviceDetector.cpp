@@ -27,9 +27,11 @@ int CBTDeviceDetector::Run()
 	//Utils::ShowError(TEXT("_tmain"));
 	while(true){
 
-		wprintf(L"BlueTooth initialization status: %d\n",DEF_BTDEVICE->InitializationStatus());
-		DEF_BTDEVICE->RegisterHandler(DEF_BTDEV_HANDLER);
-		DEF_BTDEVICE->RunDeviceInquiry(BT_DETECT_DURATION_SECONDS);
+		//Be sure to use new Bluetooth class to correctly init WSA
+		CBlueTooth cbt;
+		wprintf(L"BlueTooth initialization status: %d\n",cbt.InitializationStatus());
+		cbt.RegisterHandler(DEF_BTDEV_HANDLER);
+		cbt.RunDeviceInquiry(BT_DETECT_DURATION_SECONDS);
 
 		Sleep(BT_DETECT_INTERVAL_MS);
 	}
