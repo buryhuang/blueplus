@@ -445,6 +445,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 	WSAQUERYSET querySet, *pResults, querySet2;
 	HANDLE hLookup, hLookup2;
 	int result;
+	bool returnResult = true;
 	static int i;
 	BYTE buffer[1000];
 	BYTE buffer1[2000];
@@ -466,6 +467,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 	if (s == INVALID_SOCKET)
 	{
 		printf("Failed to get bluetooth socket with error code %ld\n", WSAGetLastError());
+		returnResult = false;
 		goto search_error;
 	}
 	else{
@@ -478,6 +480,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 	if (getsockopt(s, SOL_SOCKET, SO_PROTOCOL_INFO, (char*)&protocolInfo, &protocolInfoSize) != 0)
 	{
 		printf("getsockopt(SO_PROTOCOL_INFO) failed with error code %ld\n", WSAGetLastError());
+		returnResult = false;
 		goto search_error;
 	}
 	else{
@@ -499,6 +502,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 	// If OK
 	if (result != 0) {
 		printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
+		returnResult = false;
 		goto search_error;
 	}// end WSALookupServiceBegin()
 
@@ -515,6 +519,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 		if (result != 0)
 		{
 			printf("          WSALookupServiceNext() failed with error code %ld\n", WSAGetLastError());
+			returnResult = false;
 			goto search_error;
 		}
 
@@ -623,11 +628,13 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 					//printf("WSALookupServiceEnd(hLookup2) is fine!\n", WSAGetLastError());
 				}else{
 					printf("WSALookupServiceEnd(hLookup2) failed with error code %ld\n", WSAGetLastError());
+					returnResult = false;
 					goto search_error;
 				}
 			}
 			else {
 				printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
+				returnResult = false;
 				goto search_error;
 			}
 		}
@@ -651,10 +658,15 @@ search_error:
 	}
 
 
+	if(serviceList.size() == 0) {
+		//No service found.
+		returnResult = false;
+	}
+
 	if(m_pHandler!=NULL){
 		m_pHandler->OnServiceDiscovered(address, serviceList);
 	}
-	return true;
+	return returnResult;
 }
 
 #if 0
