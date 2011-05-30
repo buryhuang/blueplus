@@ -111,7 +111,7 @@ public:
 	int GetDeviceManufacturer(long address);
 	
 	int RunDeviceInquiry(int duration);
-	bool RunSearchServices(BTH_ADDR address);
+	bool RunSearchServices(BTH_ADDR address, int duration);
 	vector<char> GetServiceAttributes(vector<int> attrIDs, BTH_ADDR address, int handle);
 	bool RegisterHandler(CBTHandler* pHandler);
 

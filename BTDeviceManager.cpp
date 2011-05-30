@@ -29,7 +29,7 @@ void CBTDeviceMgrBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceCl
 	}
 
 	wcout<<"Searching service for "<<deviceName<<endl;
-	if(DEF_BTDEVICE->RunSearchServices(deviceAddr)==false) {
+	if(DEF_BTDEVICE->RunSearchServices(deviceAddr, BT_SERVICE_SEARCH_DURATION_SECONDS)==false) {
 		wcout <<"Service search failed, removing device."<<endl;
 		DEF_BTDEV_MGR->UnregisterDevice(deviceAddr);
 	}

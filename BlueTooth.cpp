@@ -370,31 +370,6 @@ int CBlueTooth::RunDeviceInquiry(int duration)
 			m_pHandler->OnDeviceDiscovered(deviceAddr, deviceClass, deviceName, paired);
 		}
 
-#if 0
-
-		vector<SdpQueryUuid> v;
-		for(vector<int>::iterator vi=CBlueTooth::BTServiceUuid16List.begin();
-			vi!=CBlueTooth::BTServiceUuid16List.end();
-			vi++){
-			SdpQueryUuid uid;
-			uid.uuidType = SDP_ST_UUID16;
-			uid.u.uuid16=*vi;
-			v.push_back(uid);
-		}
-
-		RunSearchServices();
-		vector<int> handles = RunSearchServices(v,deviceAddr);
-
-		vector<int> attrs;
-		attrs.push_back(0x0000);
-		attrs.push_back(0x0001);
-		attrs.push_back(0x0002);
-
-		for(vector<int>::iterator vi=handles.begin();vi!=handles.end();vi++){
-			GetServiceAttributes(attrs,deviceAddr,*vi);
-		}
-#endif
-
 		//debug(("doInquiry, listener returns"));
 	}
 
@@ -435,11 +410,10 @@ BOOL __stdcall callback(ULONG uAttribId, LPBYTE pValueStream, ULONG cbStreamSize
 	}
 }
 
-bool CBlueTooth::RunSearchServices(BTH_ADDR address)
+bool CBlueTooth::RunSearchServices(BTH_ADDR address, int duration)
 {
 	vector<ServiceRecord> serviceList;
 
-	WSADATA m_data;
 	SOCKET s;
 	WSAPROTOCOL_INFO protocolInfo;
 	int protocolInfoSize;
@@ -458,9 +432,9 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 	GUID protocol;
 
 	// Load the winsock2 library
-	if (WSAStartup(MAKEWORD(2,2), &m_data) != 0) {
-		return false;
-	}
+//	if (WSAStartup(MAKEWORD(2,2), &m_data) != 0) {
+//		return false;
+//	}
 	//printf("WSAStartup() should be fine!\n");
 
 	// Create a blutooth socket
@@ -480,18 +454,35 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 	// Get the bluetooth device info using getsockopt()
 	if (getsockopt(s, SOL_SOCKET, SO_PROTOCOL_INFO, (char*)&protocolInfo, &protocolInfoSize) != 0)
 	{
-		printf("getsockopt(SO_PROTOCOL_INFO) failed with error code %ld\n", WSAGetLastError());
+		wcout<<L"\tgetsockopt(SO_PROTOCOL_INFO) failed with error code "<<WSAGetLastError()<<endl;
 		returnResult = false;
 		goto search_error;
 	}
 	else{
-		//printf("getsockopt(SO_PROTOCOL_INFO) is OK!\n");
+		wcout<<L"\tgetsockopt(SO_PROTOCOL_INFO) is OK!"<<endl;
 	}
 
 	// Query set criteria
-	memset(&querySet, 0, sizeof(querySet));
-	querySet.dwSize = sizeof(querySet);
+	BTH_QUERY_DEVICE query;
+	query.LAP = 0;//accessCode; MSDN: Reserved. Must be set to zero.
+	query.length = (unsigned char)duration;
+
+	// build BLOB pointing to device query
+	BLOB blob;
+	blob.cbSize = sizeof(query);
+	blob.pBlobData = (BYTE *)&query;
+
+	// build query
+	memset(&querySet, 0, sizeof(WSAQUERYSET));
+	querySet.dwSize = sizeof(WSAQUERYSET);
 	querySet.dwNameSpace = NS_BTH;
+
+	querySet.lpBlob = &blob;
+
+
+	//memset(&querySet, 0, sizeof(querySet));
+	//querySet.dwSize = sizeof(querySet);
+	//querySet.dwNameSpace = NS_BTH;
 
 	// Set the flags for query
 	flags = LUP_RETURN_NAME | LUP_CONTAINERS | LUP_RETURN_ADDR | LUP_FLUSHCACHE |
@@ -502,13 +493,12 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 
 	// If OK
 	if (result != 0) {
-		printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
+		wcout<<L"\tWSALookupServiceBegin() failed with error code "<<WSAGetLastError<<endl;
 		returnResult = false;
 		goto search_error;
 	}// end WSALookupServiceBegin()
 
-	//			printf("          WSALookupServiceBegin() is OK!\n");
-	i = 0;
+	wcout<<L"\tWSALookupServiceBegin() is OK!"<<endl;;
 
 	while (result == 0)
 	{
@@ -519,7 +509,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 		result = WSALookupServiceNext(hLookup, flags, &bufferLength, pResults);
 		if (result != 0)
 		{
-			printf("          WSALookupServiceNext() failed with error code %ld\n", WSAGetLastError());
+			printf("\tWSALookupServiceNext() failed with error code %ld\n", WSAGetLastError());
 			returnResult = false;
 			goto search_error;
 		}
@@ -653,11 +643,11 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 
 search_error:
 	// Cleanup the winsock library startup
-	if(WSACleanup() == 0){
-		printf("WSACleanup() pretty fine!\n");
-	}else{
-		printf("WSACleanup() failed with error code %ld\n", WSAGetLastError());
-	}
+	//if(WSACleanup() == 0){
+	//	printf("WSACleanup() pretty fine!\n");
+	//}else{
+	//	printf("WSACleanup() failed with error code %ld\n", WSAGetLastError());
+	//}
 
 
 	if(serviceList.size() == 0) {
