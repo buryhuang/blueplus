@@ -163,7 +163,7 @@ bool CBlueTooth::InitializationStatus() {
     if (!m_bBluetoothStackPresent) {
         if (!IsBluetoothStackPresent()) {
             //throwBluetoothStateException(env, "BluetoothStack not detected");
-			Utils::ShowError(TEXT("initializationStatus"));
+			Utils::ShowError(L"initializationStatus");
         }
     }
 

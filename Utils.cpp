@@ -61,8 +61,8 @@ void Utils::ShowError(std::wstring lpszFunction)
 	swprintf((wchar_t *)lpDisplayBuf, 
 		TEXT("%s failed with error %d: %s"), 
 		lpszFunction.c_str(), dw, lpMsgBuf); 
-	//MessageBox(NULL, (std::wstring)lpDisplayBuf, TEXT("Error"), MB_OK); 
-	wcout<<lpDisplayBuf<<endl;
+	//MessageBox(NULL, (LPCWSTR)lpDisplayBuf, TEXT("Error"), MB_OK); 
+	wcout<<(LPCWSTR)lpDisplayBuf<<endl;
 
 	LocalFree(lpMsgBuf);
 	LocalFree(lpDisplayBuf);
