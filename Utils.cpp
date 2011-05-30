@@ -20,7 +20,7 @@ Utils::~Utils(void)
 wstring Utils::CurrentTime()
 {
 	SYSTEMTIME st;
-	GetSystemTime(&st);
+	GetLocalTime(&st);
 	wstring str;
 	wstringstream wiss;
 	wiss<<setfill(L'0');
