@@ -192,6 +192,9 @@ connectRety:
 	}
 
 	m_iStatus = CONNECTED;
+	if (m_pHandler != NULL) {
+		m_pHandler->OnConnect();
+	}
 
 	return true;
 }

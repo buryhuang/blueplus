@@ -38,8 +38,6 @@ using namespace std;
 //CWinApp theApp;
 CInstanceMonitor theApp;
 
-UINT MainThread(LPVOID param){return 0;}
-
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 #ifdef UNITTEST
@@ -53,13 +51,18 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 	return 0;
 }
 
+
+UINT MainThread(LPVOID param){
+	return _tmain(0,NULL,NULL);
+}
+
 // Global variables
 
 // The main window class name.
 static TCHAR szWindowClass[] = _T("win32app");
 
 // The string that appears in the application's title bar.
-static TCHAR szTitle[] = _T("Win32 Guided Tour Application");
+static TCHAR szTitle[] = _T("Win32 BlueEvent Monitor");
 
 HINSTANCE hInst;
 NOTIFYICONDATA nid;
@@ -120,9 +123,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpszCmd, int nCmdShow)
 {
-	locale loc("chs");
+	locale loc("");
 
-	wofstream logFile( "out.txt");
+	wofstream logFile( "bbt.log");
+	logFile.rdbuf()->pubsetbuf(0,0);
 	wstreambuf *outbuf = wcout.rdbuf(logFile.rdbuf());
 	wstreambuf *errbuf = wcerr.rdbuf(logFile.rdbuf()); 
 
@@ -167,7 +171,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpszCmd, int nCmd
 	HWND hWnd = CreateWindow(
 		szWindowClass,
 		szTitle,
-		WS_OVERLAPPEDWINDOW,
+		WS_OVERLAPPEDWINDOW|WS_EX_TOOLWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		500, 100,
 		NULL,

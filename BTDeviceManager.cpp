@@ -63,12 +63,20 @@ CBTDeviceManager* CBTDeviceManager::m_instance=NULL;
 void CDevMgrBTHandlerThread::OnReceive(SOCKET s, BYTEBUFFER buff)
 {
 	//wostringstream woss;
-	cout<<"Received: "<<buff<<endl;
-	//woss<<"Msg Received: "<<widen(buff);
+	wcout<<L"Received: "<<widen(buff)<<endl;
 	LOGBTEVENT(L"BT0", 0, widen(buff));
 	//Echo for testing
 	m_pSocket->Send(narrow(Utils::CurrentTime()) + buff);
 };
+
+void CDevMgrBTHandlerThread::OnConnect()
+{
+	//wostringstream woss;
+	wcout<<"Connected. Sending beacon."<<endl;
+	//Echo for testing
+	m_pSocket->Send(narrow(Utils::CurrentTime() + L"Hello\n"));
+};
+
 int CDevMgrBTHandlerThread::Run()
 {
 	m_pSocket = new CBlueToothSocket();
