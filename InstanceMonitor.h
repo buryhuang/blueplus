@@ -28,6 +28,8 @@ public:
 
 	void AppStart();
 	void GraceShutdown();
+	void Shutdown();
+
 private:
 	vector<CManagedThread*> m_listThreads;
 	static CInstanceMonitor* m_instance;
