@@ -134,6 +134,8 @@ int CBTDeviceManager::Run()
 		wcout<<L"Size of list is: "<<dec<<m_mapBTDevice.size()<<endl;
 		BT_DEV_MAP::iterator mit = m_mapBTDevice.begin();
 		int cnt=1;
+		vector<CBTDevice*> eraseList;
+
 		for(;mit!=m_mapBTDevice.end();mit++){
 			if(mit->second != NULL){
 				CBTDevice* pDev = mit->second;
@@ -153,13 +155,20 @@ int CBTDeviceManager::Run()
 					wcout<<L" - Not active"<<endl;
 					delete pDev->m_pSockHandler;
 					pDev->m_pSockHandler=NULL;
-					UnregisterDevice(pDev);
+					eraseList.push_back(pDev);
 				}
 
 				wcout<<endl;
 			}
 		}
 		wcout<<L"***End of list***"<<endl<<endl;
+		//Clean up pending erasing list
+		vector<CBTDevice*>::iterator vit = eraseList.begin();
+		for(vit=eraseList.begin();vit!=eraseList.end();vit++) {
+			wcout<<L"Erasing "<<(*vit)->m_addrBth<<endl;
+			UnregisterDevice(*vit);
+		}
+
 		ReleaseMutex(m_hMutex);
 
 		Sleep(BT_DEV_MGR_ROUTINE_INTERVAL_MS);
@@ -258,6 +267,7 @@ bool CBTDeviceManager::UnregisterDevice(BTH_ADDR deviceAddr)
 	if(m_mapBTDevice.find(deviceAddr)==m_mapBTDevice.end()){
 		return false;
 	}
+
 	delete m_mapBTDevice[deviceAddr];
 	m_mapBTDevice.erase(deviceAddr);
 
