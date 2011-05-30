@@ -38,6 +38,20 @@ using namespace std;
 //CWinApp theApp;
 CInstanceMonitor theApp;
 
+// Global variables
+
+// The main window class name.
+static TCHAR szWindowClass[] = _T("win32app");
+
+// The string that appears in the application's title bar.
+static TCHAR szTitle[] = _T("Win32 BlueEvent Monitor");
+
+HINSTANCE hInst;
+NOTIFYICONDATA nid;
+HANDLE     hThread;
+DWORD      threadId;
+
+
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 #ifdef UNITTEST
@@ -56,18 +70,11 @@ UINT MainThread(LPVOID param){
 	return _tmain(0,NULL,NULL);
 }
 
-// Global variables
-
-// The main window class name.
-static TCHAR szWindowClass[] = _T("win32app");
-
-// The string that appears in the application's title bar.
-static TCHAR szTitle[] = _T("Win32 BlueEvent Monitor");
-
-HINSTANCE hInst;
-NOTIFYICONDATA nid;
-HANDLE     hThread;
-DWORD      threadId;
+void TerminateApp()
+{
+	theApp.Shutdown();
+	TerminateThread(hThread,0);
+}
 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -91,24 +98,49 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         EndPaint(hWnd, &ps);
         break;
+
+	case WM_CLOSE:
+		if(IDOK == MessageBox(NULL, L"Are you sure to quit Health Monitor?", L"Quit?", MB_OKCANCEL)) {
+			ShowWindow(hWnd,SW_HIDE);
+			Shell_NotifyIcon(NIM_DELETE, &nid);
+			TerminateApp();
+			PostQuitMessage(0);
+		}
+		break;
+
+
     case WM_DESTROY:
-        PostQuitMessage(0);
+		TerminateApp();
+		Shell_NotifyIcon(NIM_DELETE, &nid);
+		PostQuitMessage(0);
         break;
+
+	case WM_SIZE:
+		if (wParam == SIZE_MINIMIZED) {
+			ShowWindow(hWnd, SW_HIDE);
+		}
+		break;
+
 	case TRAY_NOTIFY:
 		switch(lParam)
 		{
 		case WM_LBUTTONDBLCLK:
-			MessageBox(NULL, L"Tray icon double clicked!", L"clicked", MB_OK);
+			//MessageBox(NULL, L"Tray icon double clicked!", L"clicked", MB_OK);
+			ShowWindow(hWnd,SW_SHOW);
+			ShowWindow(hWnd,SW_RESTORE);
 			break;
 		case WM_RBUTTONUP:
 			if(IDOK == MessageBox(NULL, L"Are you sure to quit Health Monitor?", L"Quit?", MB_OKCANCEL)) {
-				ShowWindow(hWnd,FALSE);
+				ShowWindow(hWnd,SW_HIDE);
 				Shell_NotifyIcon(NIM_DELETE, &nid);
+				TerminateApp();
+
 				PostQuitMessage(0);
 
 				return 0;
 			};
 			break;
+
 		default:
 			   return DefWindowProc(hWnd, message, wParam, lParam);
 		};
@@ -156,7 +188,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpszCmd, int nCmd
     }
 
 	static TCHAR szWindowClass[] = _T("win32app");
-	static TCHAR szTitle[] = _T("Win32 Guided Tour Application");
+	static TCHAR szTitle[] = _T("Win32 BlueEvent Monitor");
 
 	// The parameters to CreateWindow explained:
 	// szWindowClass: the name of the application
@@ -171,7 +203,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpszCmd, int nCmd
 	HWND hWnd = CreateWindow(
 		szWindowClass,
 		szTitle,
-		WS_OVERLAPPEDWINDOW|WS_EX_TOOLWINDOW,
+		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		500, 100,
 		NULL,
@@ -183,16 +215,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrev, LPSTR lpszCmd, int nCmd
 	{
 		MessageBox(NULL,
 			_T("Call to CreateWindow failed!"),
-			_T("Win32 Guided Tour"),
+			_T("Win32 BlueEvent Monitor"),
 			NULL);
 
 		return 1;
 	}
+	ShowWindow(hWnd,SW_HIDE);
 
 	// The parameters to ShowWindow explained:
 	// hWnd: the value returned from CreateWindow
 	// nCmdShow: the fourth parameter from WinMain
-	ShowWindow(hWnd,nCmdShow);
+	//ShowWindow(hWnd,nCmdShow);
 	UpdateWindow(hWnd);
 
 	nid.cbSize = sizeof(NOTIFYICONDATA);

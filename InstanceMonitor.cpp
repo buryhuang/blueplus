@@ -83,4 +83,16 @@ void CInstanceMonitor::GraceShutdown()
 
 }
 
+void CInstanceMonitor::Shutdown()
+{
+	vector<CManagedThread*>::iterator vi=m_listThreads.begin();
+	for(;vi!=m_listThreads.end();vi++){
+		if((*vi)!=NULL){
+			(*vi)->Shutdown();
+		}
+		wcout<<_L(IDS_DEBUG_STARTED_SERVICE)<<(*vi)->GetName()<<endl;
+	}
+
+}
+
 /** @}*/
