@@ -3,6 +3,8 @@
  */
 
 #include "BlueToothSocket.h"
+#include <iostream>
+using namespace std;
 
 CBlueToothSocket::CBlueToothSocket(SOCKET s):
 	m_bStarted(true),
@@ -98,7 +100,7 @@ BOOL CBlueToothSocket::Create(BOOL authenticate, BOOL encrypt) {
 
 
 BOOL CBlueToothSocket::Connect(BTH_ADDR address, int channel, int retryUnreachable) {
-    //debug(("socket[%u] connect", (int)socket));
+    wcout<<"Connecting to "<<address<<" - "<<channel<<endl;
 
 	m_iStatus = CONNECTING;
 
@@ -110,13 +112,13 @@ BOOL CBlueToothSocket::Connect(BTH_ADDR address, int channel, int retryUnreachab
 			{
 				case ERROR_SUCCESS:
 				case ERROR_NO_MORE_ITEMS:
-					printf("successful");
+					wcout<<L"Authentication is successful"<<endl;;
 					break;
 				case ERROR_CANCELLED:
-					printf("cancelled");
+					wcout<<L"Authentication cancelled"<<endl;
 					break;
 				case ERROR_INVALID_PARAMETER:
-					printf("Invalid param");
+					wcout<<L"Authentication - Invalid param"<<endl;
 					break;
 			};//Will auth on all radios
 		}else{
@@ -124,13 +126,13 @@ BOOL CBlueToothSocket::Connect(BTH_ADDR address, int channel, int retryUnreachab
 			{
 				case ERROR_SUCCESS:
 				case ERROR_NO_MORE_ITEMS:
-					printf("successful");
+					wcout<<L"Authentication is successful"<<endl;
 					break;
 				case ERROR_CANCELLED:
-					printf("cancelled");
+					wcout<<L"Authentication cancelled"<<endl;
 					break;
 				case ERROR_INVALID_PARAMETER:
-					printf("Invalid param");
+					wcout<<L"Authentication - Invalid param"<<endl;
 					break;
 			};//Will auth on all radios
 		}
@@ -167,23 +169,23 @@ connectRety:
 //			    if (isCurrentThreadInterrupted(env, peer, "connect")) {
  //                   return;
 //                }
-				//debug(("connectRety %i", retyCount));
+				wcout<<L"connectRety "<<retyCount<<endl;
 				goto connectRety;
 			}
 		}
 		if (last_error == WSAEACCES) {
 			//throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_SECURITY_BLOCK, "Connecting application requested authentication, but authentication failed [10013] .");
-			Utils::ShowError(TEXT("Connect"));
+			Utils::ShowError(L"Connect");
 			m_iStatus = CONNECTION_AUTH_FAILED;
 			return false;
 		} else if (last_error == WSAETIMEDOUT) {
 			//throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_TIMEOUT, "Connection timeout; [%lu] %S", last_error, getWinErrorMessage(last_error));
-			Utils::ShowError(TEXT("Connect"));
+			Utils::ShowError(L"Connect");
 			m_iStatus = CONNECTION_TIMEOUT;
 			return false;
 		} else {
 			//throwBluetoothConnectionException(env, BT_CONNECTION_ERROR_FAILED_NOINFO, "Failed to connect; [%lu] %S", last_error, getWinErrorMessage(last_error));
-			Utils::ShowError(TEXT("Connect"));
+			Utils::ShowError(L"Connect");
 			m_iStatus = CONNECTION_FAILED;
 			return false;
 		}
