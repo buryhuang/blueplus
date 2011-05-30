@@ -54,7 +54,9 @@ void CDevMgrBTHandlerThread::OnReceive(SOCKET s, BYTEBUFFER buff)
 	//wostringstream woss;
 	cout<<"Received: "<<buff<<endl;
 	//woss<<"Msg Received: "<<widen(buff);
-	//LOGSVREVENT(0,widen(buff));
+	LOGBTEVENT(L"BT0", 0, widen(buff));
+	//Echo for testing
+	m_pSocket->Send(buff);
 };
 int CDevMgrBTHandlerThread::Run()
 {

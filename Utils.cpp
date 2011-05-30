@@ -106,22 +106,24 @@ TEST(UtilsTest,Logging)
 
 wstring widen( const string& str )
 {
-      wostringstream wstm ;
-      wstm.imbue(std::locale("en_US.UTF-8"));
-      const ctype<wchar_t>& ctfacet =
-      use_facet< ctype<wchar_t> >( wstm.getloc() ) ;
-      for( size_t i=0 ; i<str.size() ; ++i )
-      wstm << ctfacet.widen( str[i] ) ;
-      return wstm.str() ;
+	wostringstream wstm ;
+	//wstm.imbue(std::locale("en_US.UTF-8"));
+	wstm.imbue(std::locale(""));
+	const ctype<wchar_t>& ctfacet =
+	use_facet< ctype<wchar_t> >( wstm.getloc() ) ;
+	for( size_t i=0 ; i<str.size() ; ++i )
+	wstm << ctfacet.widen( str[i] ) ;
+	return wstm.str() ;
 }
        
 string narrow( const wstring& str )
 {
-      ostringstream stm ;
-      stm.imbue(std::locale("en_US"));
-      const ctype<char>& ctfacet =
-      use_facet< ctype<char> >( stm.getloc() ) ;
-      for( size_t i=0 ; i<str.size() ; ++i )
-      stm << ctfacet.narrow( str[i], 0 ) ;
-      return stm.str() ;
+	ostringstream stm ;
+	//stm.imbue(std::locale("en_US"));
+	stm.imbue(std::locale(""));
+	const ctype<char>& ctfacet =
+	use_facet< ctype<char> >( stm.getloc() ) ;
+	for( size_t i=0 ; i<str.size() ; ++i )
+	stm << ctfacet.narrow( str[i], 0 ) ;
+	return stm.str() ;
 }
