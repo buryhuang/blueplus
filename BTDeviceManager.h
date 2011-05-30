@@ -45,6 +45,7 @@ public:
 	virtual void OnClose(){};
 	virtual int Run();
 	wstring GetStatusString(){return m_pSocket->GetStatusString();}
+	CBlueToothSocket::CONNECT_STATUS_T GetStatus(){return m_pSocket->GetStatus();};
 private:
 	SOCKADDR_BTH m_sockaddrBth;
 	CBlueToothSocket * m_pSocket;
@@ -81,6 +82,8 @@ public:
 	virtual bool UpdateDevice(CBTDevice* pDevice);
 
 	virtual bool UpdateServices(BTH_ADDR deviceAddr, vector<ServiceRecord> serviceList);
+
+	virtual CBlueToothSocket::CONNECT_STATUS_T GetDeviceConnStatus(BTH_ADDR deviceAddr);
 
 	virtual BT_DEV_MAP GetDeviceMap();
 	void ListDevices();

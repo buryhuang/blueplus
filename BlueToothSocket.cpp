@@ -106,7 +106,7 @@ BOOL CBlueToothSocket::Connect(BTH_ADDR address, int channel, int retryUnreachab
 
 	if(m_bAuth){
 		BLUETOOTH_DEVICE_INFO btdi;
-		CBlueTooth::getBluetoothDeviceInfo(address,&btdi,false);
+		CBlueTooth::GetBluetoothDeviceInfo(address,&btdi,false);
 		if(m_passkey.size()>0){
 			switch(BluetoothAuthenticateDevice(NULL, NULL, &btdi, &m_passkey[0], m_passkey.size()))
 			{
