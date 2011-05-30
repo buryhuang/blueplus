@@ -20,7 +20,8 @@ public:
 
 class CBlueToothSocket
 {
-	enum{
+public:
+	enum CONNECT_STATUS_T {
 		NOT_CREATED,
 		CREATED,
 		LISTENING,
@@ -34,7 +35,7 @@ class CBlueToothSocket
 		CLOSED
 	};
 
-public:
+
 	CBlueToothSocket();
 	CBlueToothSocket(SOCKET);
 	virtual ~CBlueToothSocket();
@@ -50,6 +51,7 @@ public:
 	size_t Send(BYTEBUFFER buff);
 	bool RegisterHandler(CSocketHandler*);
 	wstring GetStatusString();
+	CONNECT_STATUS_T GetStatus() {return m_iStatus;}
 	void SetPasskey(wstring passkey);
 
 protected:
@@ -59,7 +61,7 @@ protected:
 	BOOL m_bCreated;
 	vector<SOCKET> m_listSocket;
 	CSocketHandler* m_pHandler;
-	int m_iStatus;
+	CONNECT_STATUS_T m_iStatus;
 	wstring m_passkey;
 	BOOL m_bAuth;
 	HBLUETOOTH_AUTHENTICATION_REGISTRATION m_hAuth;

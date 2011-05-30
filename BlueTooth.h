@@ -116,7 +116,7 @@ public:
 	bool RegisterHandler(CBTHandler* pHandler);
 
 	static bool GetBluetoothGetRadioInfo(BTH_ADDR address, BLUETOOTH_RADIO_INFO* info);
-	static bool CBlueTooth::getBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO* pbtdi, BOOL issueInquiry);
+	static bool CBlueTooth::GetBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO* pbtdi, BOOL issueInquiry);
 
 
 	//virtual void OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired);

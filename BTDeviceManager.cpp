@@ -20,12 +20,23 @@ CBTDeviceMgrBTHandler::~CBTDeviceMgrBTHandler(void)
 
 void CBTDeviceMgrBTHandler::OnDeviceDiscovered(BTH_ADDR deviceAddr, int deviceClass, wstring deviceName, bool paired)
 {
-	wcout<<"Device found: "<<hex<<deviceAddr<<" - "<<deviceName<<endl;
+	wcout<<"Device found: "<<hex<<deviceAddr<<" - "<<deviceName<<" - "<<(paired?"Paired":"Unpaired")<<endl;
 	if(DEF_BTDEV_MGR->RegisterDevice(deviceAddr, deviceClass, deviceName, paired)!=true){
 		wcout<<L"Registering failed"<<endl;
 		if(DEF_BTDEV_MGR->UpdateDevice(deviceAddr, deviceClass, deviceName, paired)!=true){
 			wcout<<L"Updating failed"<<endl;
 		}
+	}
+
+	if(paired
+		&& (DEF_BTDEV_MGR->GetDeviceConnStatus(deviceAddr) != CBlueToothSocket::CONNECTED)
+		&& (DEF_BTDEV_MGR->GetDeviceConnStatus(deviceAddr) != CBlueToothSocket::CONNECTING)
+		) {
+		//Sorry, have to disconnect you first
+		wcout<<L"Sorry, have to disconnect you first: "<<deviceAddr<<endl;
+		BLUETOOTH_DEVICE_INFO bdi;
+		CBlueTooth::GetBluetoothDeviceInfo(deviceAddr, &bdi,false);
+		BluetoothRemoveDevice(&bdi.Address);
 	}
 
 	wcout<<"Searching service for "<<deviceName<<endl;
@@ -274,6 +285,19 @@ bool CBTDeviceManager::UnregisterDevice(BTH_ADDR deviceAddr)
 	ReleaseMutex(m_hMutex);
 
 	return true;
+}
+
+CBlueToothSocket::CONNECT_STATUS_T CBTDeviceManager::GetDeviceConnStatus(BTH_ADDR deviceAddr)
+{
+	CBlueToothSocket::CONNECT_STATUS_T status = CBlueToothSocket::NOT_CREATED;
+	WaitForSingleObject(m_hMutex,INFINITE);
+	if(m_mapBTDevice.find(deviceAddr) != m_mapBTDevice.end()
+		&& m_mapBTDevice[deviceAddr]->m_pSockHandler != NULL) {
+		status = m_mapBTDevice[deviceAddr]->m_pSockHandler->GetStatus();
+	}
+
+	ReleaseMutex(m_hMutex);
+	return status;
 }
 
 BT_DEV_MAP CBTDeviceManager::GetDeviceMap()

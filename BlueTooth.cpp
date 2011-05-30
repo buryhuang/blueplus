@@ -198,7 +198,7 @@ bool CBlueTooth::GetBluetoothGetRadioInfo(BTH_ADDR address, BLUETOOTH_RADIO_INFO
 	return false;
 }
 
-bool CBlueTooth::getBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO* pbtdi, BOOL issueInquiry) {
+bool CBlueTooth::GetBluetoothDeviceInfo(BTH_ADDR address, BLUETOOTH_DEVICE_INFO* pbtdi, BOOL issueInquiry) {
 	BLUETOOTH_DEVICE_SEARCH_PARAMS btsp;
 	memset(&btsp, 0, sizeof(btsp));
     btsp.dwSize = sizeof(btsp);
@@ -441,7 +441,7 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address, int duration)
 	s = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM);
 	if (s == INVALID_SOCKET)
 	{
-		printf("Failed to get bluetooth socket with error code %ld\n", WSAGetLastError());
+		wcout<<L"\tFailed to get bluetooth socket with error code "<<WSAGetLastError()<<endl;
 		returnResult = false;
 		goto search_error;
 	}
