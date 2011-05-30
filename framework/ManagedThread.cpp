@@ -23,6 +23,7 @@ public:
    {
       CPrivateManagedThread* This = (CPrivateManagedThread*)param;
       This->Run(); // call a member function
+	  ExitThread(0);
 	  return 0;
    }
 

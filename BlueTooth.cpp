@@ -570,70 +570,67 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 
 			// Start service query
 			result = WSALookupServiceBegin(&querySet2, flags, &hLookup2);
-			if (result == 0)
+			if (result != 0)
 			{
-				//printf("          WSALookupServiceBegin() is OK!\n");
-				while (result == 0)
+				printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
+				returnResult = false;
+				goto search_error;
+			}
+			//printf("          WSALookupServiceBegin() is OK!\n");
+
+			while (result == 0)
+			{
+				bufferLength1 = sizeof(buffer1);
+				pResults = (WSAQUERYSET *)&buffer1;
+
+				// Next service query
+				result = WSALookupServiceNext(hLookup2, flags, &bufferLength1, pResults);
+
+				if(result != 0) {
+					printf("          WSALookupServiceNext() failed with error code %ld\n", WSAGetLastError());
+					printf("          Error code = 11011 ~ WSA_E_NO_MORE ~ No more device!\n");
+					goto search_error;
+				}
+
+				ServiceRecord sr;
+				// Populate the service info
+				//printf("          WSALookupServiceNext() is OK!\n");
+				//printf("          WSALookupServiceNext() - service instance name: %S\n",
+				//			pResults->lpszServiceInstanceName);
+				//printf("          WSALookupServiceNext() - comment (if any): %s\n", pResults->lpszComment);
+				//printf("          WSALookupServiceNext() - port (if any): %x\n", ((SOCKADDR_BTH *)pResults->lpcsaBuffer->RemoteAddr.lpSockaddr)->port);
+				pCSAddr = (CSADDR_INFO *)pResults->lpcsaBuffer;
+
+				sr.serviceInstanceName=pResults->lpszServiceInstanceName;
+				sr.comment=pResults->lpszComment;
+				sr.sockaddrBth = *((SOCKADDR_BTH *)pResults->lpcsaBuffer->RemoteAddr.lpSockaddr);
+
+				if(sr.serviceInstanceName.find(L"Serial")!=wstring::npos){
+					//TODO hard code for now
+					serviceList.push_back(sr);
+				}
+
+				// Extract the sdp info
+				if (pResults->lpBlob)
 				{
-					bufferLength1 = sizeof(buffer1);
-					pResults = (WSAQUERYSET *)&buffer1;
-
-					// Next service query
-					result = WSALookupServiceNext(hLookup2, flags, &bufferLength1, pResults);
-
-					if(result == 0)
+					pBlob = (BLOB*)pResults->lpBlob;
+					if (!BluetoothSdpEnumAttributes(pBlob->pBlobData, pBlob->cbSize, callback, 0))
 					{
-						ServiceRecord sr;
-						// Populate the service info
-						//printf("          WSALookupServiceNext() is OK!\n");
-						//printf("          WSALookupServiceNext() - service instance name: %S\n",
-						//			pResults->lpszServiceInstanceName);
-						//printf("          WSALookupServiceNext() - comment (if any): %s\n", pResults->lpszComment);
-						//printf("          WSALookupServiceNext() - port (if any): %x\n", ((SOCKADDR_BTH *)pResults->lpcsaBuffer->RemoteAddr.lpSockaddr)->port);
-						pCSAddr = (CSADDR_INFO *)pResults->lpcsaBuffer;
-
-						sr.serviceInstanceName=pResults->lpszServiceInstanceName;
-						sr.comment=pResults->lpszComment;
-						sr.sockaddrBth = *((SOCKADDR_BTH *)pResults->lpcsaBuffer->RemoteAddr.lpSockaddr);
-
-						if(sr.serviceInstanceName.find(L"Serial")!=wstring::npos){
-							//TODO hard code for now
-							serviceList.push_back(sr);
-						}
-
-						// Extract the sdp info
-						if (pResults->lpBlob)
-						{
-							pBlob = (BLOB*)pResults->lpBlob;
-							if (!BluetoothSdpEnumAttributes(pBlob->pBlobData, pBlob->cbSize, callback, 0))
-							{
-								printf("BluetoothSdpEnumAttributes() failed with error code %ld\n", WSAGetLastError());
-							}
-							else
-							{
-								//printf("BluetoothSdpEnumAttributes() #%d is OK!\n", i++);
-							}
-						}
+						printf("BluetoothSdpEnumAttributes() failed with error code %ld\n", WSAGetLastError());
 					}
 					else
 					{
-						printf("          WSALookupServiceNext() failed with error code %ld\n", WSAGetLastError());
-						printf("          Error code = 11011 ~ WSA_E_NO_MORE ~ No more device!\n");
-						goto search_error;
+						//printf("BluetoothSdpEnumAttributes() #%d is OK!\n", i++);
 					}
 				}
 
-				// Close the handle to service query
-				if(WSALookupServiceEnd(hLookup2) == 0){
-					//printf("WSALookupServiceEnd(hLookup2) is fine!\n", WSAGetLastError());
-				}else{
-					printf("WSALookupServiceEnd(hLookup2) failed with error code %ld\n", WSAGetLastError());
-					returnResult = false;
-					goto search_error;
-				}
 			}
-			else {
-				printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
+
+			// Close the handle to service query
+			if(WSALookupServiceEnd(hLookup2) == 0){
+				//printf("WSALookupServiceEnd(hLookup2) is fine!\n", WSAGetLastError());
+			}else{
+				printf("WSALookupServiceEnd(hLookup2) failed with error code %ld\n", WSAGetLastError());
 				returnResult = false;
 				goto search_error;
 			}
@@ -661,11 +658,10 @@ search_error:
 	if(serviceList.size() == 0) {
 		//No service found.
 		returnResult = false;
-	}
-
-	if(m_pHandler!=NULL){
+	} else if (m_pHandler!=NULL){
 		m_pHandler->OnServiceDiscovered(address, serviceList);
 	}
+
 	return returnResult;
 }
 
