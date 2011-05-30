@@ -5,6 +5,8 @@
 #include "config.h"
 #include "BTDeviceDetector.h"
 #include "BTDeviceManager.h"
+#include <iostream>
+using namespace std;
 
 
 CBTDeviceDetector* CBTDeviceDetector::m_instance=NULL;
@@ -28,10 +30,14 @@ int CBTDeviceDetector::Run()
 	while(true){
 
 		//Be sure to use new Bluetooth class to correctly init WSA
-		CBlueTooth cbt;
-		wprintf(L"BlueTooth initialization status: %d\n",cbt.InitializationStatus());
-		cbt.RegisterHandler(DEF_BTDEV_HANDLER);
-		cbt.RunDeviceInquiry(BT_DETECT_DURATION_SECONDS);
+		bool btInited = DEF_BTDEVICE->InitializationStatus();
+		wprintf(L"BlueTooth initialization status: %d\n",btInited);
+		if(btInited) {
+			DEF_BTDEVICE->RegisterHandler(DEF_BTDEV_HANDLER);
+			DEF_BTDEVICE->RunDeviceInquiry(BT_DETECT_DURATION_SECONDS);
+		} else {
+			wcout<<L"Wait until BlueTooth is available"<<endl;
+		}
 
 		Sleep(BT_DETECT_INTERVAL_MS);
 	}

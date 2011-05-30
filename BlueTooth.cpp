@@ -164,6 +164,7 @@ bool CBlueTooth::InitializationStatus() {
         if (!IsBluetoothStackPresent()) {
             //throwBluetoothStateException(env, "BluetoothStack not detected");
 			Utils::ShowError(L"initializationStatus");
+			return false;
         }
     }
 
@@ -573,8 +574,10 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 			if (result != 0)
 			{
 				printf("WSALookupServiceBegin() failed with error code %ld\n", WSAGetLastError());
-				returnResult = false;
-				goto search_error;
+				//Maybe expected...?
+				continue; // don't do the rest
+				//returnResult = false;
+				//goto search_error;
 			}
 			//printf("          WSALookupServiceBegin() is OK!\n");
 
@@ -589,7 +592,8 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 				if(result != 0) {
 					printf("          WSALookupServiceNext() failed with error code %ld\n", WSAGetLastError());
 					printf("          Error code = 11011 ~ WSA_E_NO_MORE ~ No more device!\n");
-					goto search_error;
+					//Don't goto service_error. This error is expected.
+					break;
 				}
 
 				ServiceRecord sr;
@@ -631,8 +635,9 @@ bool CBlueTooth::RunSearchServices(BTH_ADDR address)
 				//printf("WSALookupServiceEnd(hLookup2) is fine!\n", WSAGetLastError());
 			}else{
 				printf("WSALookupServiceEnd(hLookup2) failed with error code %ld\n", WSAGetLastError());
-				returnResult = false;
-				goto search_error;
+				//returnResult = false;
+				//goto search_error;
+				// Maybe still expected..?
 			}
 		}
 	}
@@ -659,6 +664,7 @@ search_error:
 		//No service found.
 		returnResult = false;
 	} else if (m_pHandler!=NULL){
+		returnResult = true;
 		m_pHandler->OnServiceDiscovered(address, serviceList);
 	}
 
