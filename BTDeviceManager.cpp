@@ -62,9 +62,10 @@ CBTDeviceManager* CBTDeviceManager::m_instance=NULL;
 
 void CDevMgrBTHandlerThread::OnReceive(SOCKET s, BYTEBUFFER buff)
 {
-	//wostringstream woss;
+	wostringstream woss;
+	woss << m_sockaddrBth.btAddr;
 	wcout<<L"Received: "<<widen(buff)<<endl;
-	LOGBTEVENT(L"BT0", 0, widen(buff));
+	LOGBTEVENT(woss.str(), 0, widen(buff));
 	//Echo for testing
 	m_pSocket->Send(narrow(Utils::CurrentTime()) + buff);
 };
@@ -72,7 +73,7 @@ void CDevMgrBTHandlerThread::OnReceive(SOCKET s, BYTEBUFFER buff)
 void CDevMgrBTHandlerThread::OnConnect()
 {
 	//wostringstream woss;
-	wcout<<"Connected. Sending beacon."<<endl;
+	wcout<<"Connected to "<<m_sockaddrBth.btAddr<<". Sending beacon."<<endl;
 	//Echo for testing
 	m_pSocket->Send(narrow(Utils::CurrentTime() + L"Hello\n"));
 };
