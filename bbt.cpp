@@ -81,7 +81,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
     HDC hdc;
-    TCHAR greeting[] = _T("Hello, World!");
+    TCHAR greeting[] = _T("消息记录请看运行目录的 bbt.log文件. 可以最小化使用,图标在通知栏.");
 
     switch (message)
     {
